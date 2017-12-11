@@ -1,8 +1,14 @@
 *.log
 .idea/
-spark-api/
 target/
 tools/
 logs/
 project/project/
-spark-warehouse/
+**/target/
+.cache
+*.iws
+/out/
+.lib/
+dist/*
+spark-warehouse
+
