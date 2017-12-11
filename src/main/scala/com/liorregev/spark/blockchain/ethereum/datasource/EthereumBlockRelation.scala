@@ -1,9 +1,9 @@
-package com.liorregev.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.datasource
 
 import java.io.InputStream
 
-import com.liorregev.blockchain.ethereum.model.{EnrichedEthereumBlock, EthereumBlock}
-import com.liorregev.blockchain._
+import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, EthereumBlock}
+import com.liorregev.spark.blockchain._
 
 import org.apache.spark.input.PortableDataStream
 import org.apache.spark.rdd.RDD

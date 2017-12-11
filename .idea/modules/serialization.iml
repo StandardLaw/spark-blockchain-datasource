@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="serialization" external.linked.project.path="$MODULE_DIR$/../../libraries/serialization" external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/classes" />
+    <output-test url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../libraries/serialization">
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/main/scala-2.11" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/test/scala-2.11" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/src_managed/main" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/src_managed/test" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/resource_managed/main" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../libraries/serialization/target/scala-2.11/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../libraries/serialization/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.fasterxml.jackson.core:jackson-annotations:2.8.9:jar" level="project" />
+    <orderEntry type="module-library">
+      <library name="sbt: unmanaged-sources-and-docs">
+        <CLASSES />
+        <JAVADOC>
+          <root url="jar://$USER_HOME$/.coursier/cache/v1/https/repo1.maven.org/maven2/org/apache/avro/avro-mapred/1.7.7/avro-mapred-1.7.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.coursier/cache/v1/https/repo1.maven.org/maven2/org/apache/avro/avro-mapred/1.7.7/avro-mapred-1.7.7-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.wartremover:wartremover_2.11:2.2.1:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.wartremover:wartremover-contrib_2.11:1.1.0:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.typelevel:macro-compat_2.11:1.1.1:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.scala-lang.modules:scala-xml_2.11:1.0.4:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.scala-lang:scala-reflect:2.11.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.11.8:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.scala-lang:scala-compiler:2.11.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.joda:joda-convert:1.9.2:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: joda-time:joda-time:2.9.9:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.typesafe.play:play-json_2.11:2.6.7:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.typesafe.play:play-json-joda_2.11:2.6.7:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.typesafe.play:play-functional_2.11:2.6.7:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.9:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.9:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.fasterxml.jackson.core:jackson-databind:2.8.9:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.fasterxml.jackson.core:jackson-core:2.8.9:jar" level="project" />
+  </component>
+</module>

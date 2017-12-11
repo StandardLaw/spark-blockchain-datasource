@@ -1,6 +1,6 @@
-package com.liorregev.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.datasource
 
-import com.liorregev.blockchain.ethereum.model._
+import com.liorregev.spark.blockchain.ethereum.model._
 import org.scalactic.Equality
 
 

@@ -1,9 +1,10 @@
-package com.liorregev.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.datasource
 
 import java.time.Instant
 
-import com.liorregev.blockchain._
-import com.liorregev.blockchain.ethereum.model._
+import com.liorregev.spark.blockchain._
+import com.liorregev.spark.blockchain.ethereum._
+import com.liorregev.spark.blockchain.ethereum.model._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSuite, Matchers}
 
@@ -28,8 +29,8 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
       "6574682e70702e7561".bytes,
       "8b1a47758a1d7472".bytes
     )
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block447533.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").load(path).as[EthereumBlock].collect()
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val blocks = spark.read.ethereum(path).collect()
     blocks.length should be(1)
 
     val header = blocks.map(_.ethereumBlockHeader).head
@@ -41,43 +42,36 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
       "0047a8033cc6d6ca2ed5044674fd421f44884de8".bytes,
       "2910543af39aba0cd09dbb2d50200b3e800a63d2".bytes
     )
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block447533.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").option("enrich", "true")
-      .load(path).as[EnrichedEthereumBlock].collect()
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val blocks = spark.read.enrichedEthereum(path).collect()
     blocks.flatMap(_.ethereumTransactions).map(_.sendAddress) should contain theSameElementsInOrderAs transactionSenders
   }
 
   test("Correctly parse senders in block 84546") {
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block84546.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").option("enrich", "true")
-      .load(path).as[EnrichedEthereumBlock]
-      .collect()
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block84546.bin").toString
+    val blocks = spark.read.enrichedEthereum(path).collect()
     blocks.flatMap(_.ethereumTransactions).map(_.sendAddress.hex).head should be("c4c6baf00209a0f33331e4b7cb1c7b680a3d2f79")
   }
 
-  test("Correctly parse senders in block 2800597") {
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block2800597.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource")
-      .load(path).as[EthereumBlock]
-      .collect()
+  test("Correctly parse senders in block 2800597 with post-parse enrichment") {
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block2800597.bin").toString
+    val blocks = spark.read.ethereum(path).collect()
     val transaction = blocks.flatMap(_.ethereumTransactions).head.toEnriched
     transaction.sendAddress.hex should be("32be343b94f860124dc4fee278fdcbd38c102d88")
   }
 
   test("Parsing enriched blocks and enriching block after parsing yields the same results for block 447533") {
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block447533.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").load(path).as[EthereumBlock].collect()
-    val enrichedBlocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").option("enrich", "true")
-      .load(path).as[EnrichedEthereumBlock].collect()
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val blocks = spark.read.ethereum(path).collect()
+    val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 
     blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks
   }
 
   test("Parsing enriched blocks and enriching block after parsing yields the same results for block 2800597") {
-    val path = getClass.getResource("/com/liorregev/blockchain/ethereum/block2800597.bin").toString
-    val blocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").load(path).as[EthereumBlock].collect()
-    val enrichedBlocks = spark.read.format("com.liorregev.blockchain.ethereum.datasource").option("enrich", "true")
-      .load(path).as[EnrichedEthereumBlock].collect()
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block2800597.bin").toString
+    val blocks = spark.read.ethereum(path).as[EthereumBlock].collect()
+    val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 
     blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks
   }

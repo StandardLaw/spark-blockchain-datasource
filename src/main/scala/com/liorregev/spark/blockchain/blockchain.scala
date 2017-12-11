@@ -1,4 +1,4 @@
-package com.liorregev
+package com.liorregev.spark
 
 import java.nio.{ByteBuffer, ByteOrder}
 

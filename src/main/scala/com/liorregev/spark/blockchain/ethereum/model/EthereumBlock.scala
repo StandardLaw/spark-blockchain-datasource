@@ -1,6 +1,6 @@
-package com.liorregev.blockchain.ethereum.model
+package com.liorregev.spark.blockchain.ethereum.model
 
-import com.liorregev.blockchain._
+import com.liorregev.spark.blockchain._
 import org.apache.spark.sql.{Encoder, Encoders}
 import org.ethereum.core.{
   Block => EthereumjBlock,
