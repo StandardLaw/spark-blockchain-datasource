@@ -26,9 +26,9 @@ trait EthereumTestUtils {
       case _ => false
     }
 
-  implicit val transactionEquality: Equality[EthereumTransaction] = (a: EthereumTransaction, b: Any) =>
+  implicit val transactionEquality: Equality[SimpleEthereumTransaction] = (a: SimpleEthereumTransaction, b: Any) =>
     (a, b) match {
-      case (transactionA: EthereumTransaction, transactionB: EthereumTransaction) =>
+      case (transactionA: SimpleEthereumTransaction, transactionB: SimpleEthereumTransaction) =>
         productEquality(transactionA, transactionB)
       case _ => false
     }
@@ -41,13 +41,19 @@ trait EthereumTestUtils {
         case _ => false
       }
 
-  implicit val blockEquality: Equality[EthereumBlock] =
-    (a: EthereumBlock, b: Any) =>
+  implicit val blockEquality: Equality[SimpleEthereumBlock] =
+    (a: SimpleEthereumBlock, b: Any) =>
       (a, b) match {
-        case (blockA: EthereumBlock, blockB: EthereumBlock) =>
-          blockHeaderEquality.areEqual(blockA.ethereumBlockHeader, blockB.ethereumBlockHeader) &&
-            blockA.ethereumTransactions.zip(blockB.ethereumTransactions).forall(x => transactionEquality.areEqual(x._1, x._2)) &&
-            blockA.uncleHeaders.zip(blockB.uncleHeaders).forall(x => blockHeaderEquality.areEqual(x._1, x._2))
+        case (blockA: SimpleEthereumBlock, blockB: SimpleEthereumBlock) =>
+          val headerEqual = blockHeaderEquality.areEqual(blockA.ethereumBlockHeader, blockB.ethereumBlockHeader)
+          val transactionsEqual = blockA.ethereumTransactions
+            .zip(blockB.ethereumTransactions)
+            .forall(x => transactionEquality.areEqual(x._1, x._2))
+          val uncleEqual = blockA.uncleHeaders
+            .zip(blockB.uncleHeaders)
+            .forall(x => blockHeaderEquality.areEqual(x._1, x._2))
+
+          headerEqual && transactionsEqual && uncleEqual
         case _ => false
       }
 

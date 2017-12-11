@@ -29,50 +29,70 @@ object EthereumBlockHeader {
 
 }
 
-@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals", "org.wartremover.warts.Null"))
-final case class EthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
-                                     gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
-                                     sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer]) {
-  def toEnriched: EnrichedEthereumTransaction = {
-    val ethereumjTransaction = toEthereumj
-    EnrichedEthereumTransaction.fromEthereumjTransaction(ethereumjTransaction)
-  }
+sealed trait EthereumTransaction {
+  def nonce: Array[Byte]
+  def value: Array[Byte]
+  def receiveAddress: Array[Byte]
+  def gasPrice: Long
+  def gasLimit: Long
+  def data: Option[Array[Byte]]
+  def sig_v: Byte
+  def sig_r: Array[Byte]
+  def sig_s: Array[Byte]
+  def chainId: Option[java.lang.Integer]
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def toEthereumj: EthereumjTransaction = {
     new EthereumjTransaction(nonce, gasPrice.bytes, gasLimit.bytes, receiveAddress, value,
       data.orNull, sig_r, sig_s, sig_v, chainId.orNull)
   }
 }
 
-object EthereumTransaction {
-  def fromEthereumjTransaction(transaction: EthereumjTransaction): EthereumTransaction = {
+@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
+final case class SimpleEthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
+                                     gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
+                                     sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer])
+  extends EthereumTransaction {
+
+  def toEnriched: EnrichedEthereumTransaction = EnrichedEthereumTransaction.fromEthereumjTransaction(toEthereumj)
+}
+
+object SimpleEthereumTransaction {
+  def fromEthereumjTransaction(transaction: EthereumjTransaction): SimpleEthereumTransaction = {
     val signature = transaction.getSignature
     val value = transaction.getValue
-    EthereumTransaction(transaction.getNonce, if (ByteUtil.isSingleZero(value)) Array() else value,
+    SimpleEthereumTransaction(transaction.getNonce, if (ByteUtil.isSingleZero(value)) Array() else value,
       transaction.getReceiveAddress, transaction.getGasPrice.reverse.asLong, transaction.getGasLimit.reverse.asLong,
       Option(transaction.getData), signature.v, signature.r.toByteArray,
       signature.s.toByteArray, Option(transaction.getChainId))
   }
-  implicit val encoder: Encoder[EthereumTransaction] = Encoders.product[EthereumTransaction]
+  implicit val encoder: Encoder[SimpleEthereumTransaction] = Encoders.product[SimpleEthereumTransaction]
 }
 
-final case class EthereumBlock(ethereumBlockHeader: EthereumBlockHeader,
-                               ethereumTransactions: Seq[EthereumTransaction],
-                               uncleHeaders: Seq[EthereumBlockHeader]) {
+sealed trait EthereumBlock[T <: EthereumTransaction] {
+  def ethereumBlockHeader: EthereumBlockHeader
+  def ethereumTransactions: Seq[T]
+  def uncleHeaders: Seq[EthereumBlockHeader]
+}
+
+final case class SimpleEthereumBlock(ethereumBlockHeader: EthereumBlockHeader,
+                                     ethereumTransactions: Seq[SimpleEthereumTransaction],
+                                     uncleHeaders: Seq[EthereumBlockHeader])
+  extends EthereumBlock[SimpleEthereumTransaction] {
   def toEnriched: EnrichedEthereumBlock =
     EnrichedEthereumBlock(ethereumBlockHeader, ethereumTransactions.map(_.toEnriched), uncleHeaders)
 }
 
-object EthereumBlock {
-  def fromEthereumjBlock(block: EthereumjBlock): EthereumBlock = {
-    EthereumBlock(
+object SimpleEthereumBlock {
+  def fromEthereumjBlock(block: EthereumjBlock): SimpleEthereumBlock = {
+    SimpleEthereumBlock(
       EthereumBlockHeader.fromEthereumjBlockHeader(block.getHeader),
-      block.getTransactionsList.asScala.map(EthereumTransaction.fromEthereumjTransaction),
+      block.getTransactionsList.asScala.map(SimpleEthereumTransaction.fromEthereumjTransaction),
       block.getUncleList.asScala.map(EthereumBlockHeader.fromEthereumjBlockHeader)
     )
   }
 
-  implicit val encoder: Encoder[EthereumBlock] = Encoders.product[EthereumBlock]
+  implicit val encoder: Encoder[SimpleEthereumBlock] = Encoders.product[SimpleEthereumBlock]
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
@@ -80,11 +100,11 @@ final case class EnrichedEthereumTransaction(nonce: Array[Byte], value: Array[By
                                              gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
                                              sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer],
                                              sendAddress: Array[Byte], hash: Array[Byte],
-                                             contractAddress: Option[Array[Byte]])
+                                             contractAddress: Option[Array[Byte]]) extends EthereumTransaction
 
 object EnrichedEthereumTransaction {
   def fromEthereumjTransaction(transaction: EthereumjTransaction): EnrichedEthereumTransaction = {
-    val simpleTransaction = EthereumTransaction.fromEthereumjTransaction(transaction)
+    val simpleTransaction = SimpleEthereumTransaction.fromEthereumjTransaction(transaction)
     EnrichedEthereumTransaction(simpleTransaction.nonce, simpleTransaction.value, simpleTransaction.receiveAddress,
       simpleTransaction.gasPrice, simpleTransaction.gasLimit, simpleTransaction.data, simpleTransaction.sig_v,
       simpleTransaction.sig_r, simpleTransaction.sig_s, simpleTransaction.chainId,
@@ -96,6 +116,7 @@ object EnrichedEthereumTransaction {
 final case class EnrichedEthereumBlock(ethereumBlockHeader: EthereumBlockHeader,
                                        ethereumTransactions: Seq[EnrichedEthereumTransaction],
                                        uncleHeaders: Seq[EthereumBlockHeader])
+  extends EthereumBlock[EnrichedEthereumTransaction]
 
 object EnrichedEthereumBlock {
   def fromEthereumjBlock(block: EthereumjBlock): EnrichedEthereumBlock = {

@@ -70,7 +70,7 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
 
   test("Parsing enriched blocks and enriching block after parsing yields the same results for block 2800597") {
     val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block2800597.bin").toString
-    val blocks = spark.read.ethereum(path).as[EthereumBlock].collect()
+    val blocks = spark.read.ethereum(path).collect()
     val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 
     blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks

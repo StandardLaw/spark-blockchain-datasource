@@ -1,6 +1,6 @@
 package com.liorregev.spark.blockchain
 
-import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, EthereumBlock}
+import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, SimpleEthereumBlock}
 import org.apache.spark.sql.{DataFrameReader, Dataset}
 
 package object ethereum {
@@ -9,8 +9,8 @@ package object ethereum {
     * the DataFileReade
     */
   implicit class AvroDataFrameReader(reader: DataFrameReader) {
-    def ethereum: String => Dataset[EthereumBlock] = path => reader.option("enrich", "false")
-      .format("com.liorregev.spark.blockchain.ethereum").load(path).as[EthereumBlock]
+    def ethereum: String => Dataset[SimpleEthereumBlock] = path => reader.option("enrich", "false")
+      .format("com.liorregev.spark.blockchain.ethereum").load(path).as[SimpleEthereumBlock]
 
     def enrichedEthereum: String => Dataset[EnrichedEthereumBlock] = path => reader.option("enrich", "true")
       .format("com.liorregev.spark.blockchain.ethereum").load(path).as[EnrichedEthereumBlock]

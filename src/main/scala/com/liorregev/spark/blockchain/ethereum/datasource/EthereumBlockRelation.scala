@@ -2,7 +2,7 @@ package com.liorregev.spark.blockchain.ethereum.datasource
 
 import java.io.InputStream
 
-import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, EthereumBlock}
+import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, SimpleEthereumBlock}
 import com.liorregev.spark.blockchain._
 
 import org.apache.spark.input.PortableDataStream
@@ -17,7 +17,7 @@ final case class EthereumBlockRelation(location: String, enrich: Boolean)(@trans
   override def schema: StructType = if(enrich) {
     EnrichedEthereumBlock.encoder.schema
   } else {
-    EthereumBlock.encoder.schema
+    SimpleEthereumBlock.encoder.schema
   }
 
   private def parseRLPLengthWithIndicator(data: Array[Byte]): Int = {
@@ -73,7 +73,7 @@ final case class EthereumBlockRelation(location: String, enrich: Boolean)(@trans
     val toBlockFunction = if(enrich) {
       (block: Block) => Row.fromTuple(EnrichedEthereumBlock.fromEthereumjBlock(block))
     } else {
-      (block: Block) => Row.fromTuple(EthereumBlock.fromEthereumjBlock(block))
+      (block: Block) => Row.fromTuple(SimpleEthereumBlock.fromEthereumjBlock(block))
     }
     sqlContext.sparkContext
       .binaryFiles(location)
