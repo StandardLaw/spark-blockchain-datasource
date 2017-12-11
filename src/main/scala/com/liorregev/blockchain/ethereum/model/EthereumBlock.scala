@@ -2,7 +2,11 @@ package com.liorregev.blockchain.ethereum.model
 
 import com.liorregev.blockchain._
 import org.apache.spark.sql.{Encoder, Encoders}
-import org.ethereum.core.{Block => EthereumjBlock, BlockHeader => EthereumjBlockHeader, Transaction => EthereumjTransaction}
+import org.ethereum.core.{
+  Block => EthereumjBlock,
+  BlockHeader => EthereumjBlockHeader,
+  Transaction => EthereumjTransaction
+}
 import org.ethereum.util.ByteUtil
 
 import scala.collection.JavaConverters._
@@ -75,7 +79,8 @@ object EthereumBlock {
 final case class EnrichedEthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
                                              gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
                                              sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer],
-                                             sendAddress: Array[Byte], hash: Array[Byte])
+                                             sendAddress: Array[Byte], hash: Array[Byte],
+                                             contractAddress: Option[Array[Byte]])
 
 object EnrichedEthereumTransaction {
   def fromEthereumjTransaction(transaction: EthereumjTransaction): EnrichedEthereumTransaction = {
@@ -83,7 +88,7 @@ object EnrichedEthereumTransaction {
     EnrichedEthereumTransaction(simpleTransaction.nonce, simpleTransaction.value, simpleTransaction.receiveAddress,
       simpleTransaction.gasPrice, simpleTransaction.gasLimit, simpleTransaction.data, simpleTransaction.sig_v,
       simpleTransaction.sig_r, simpleTransaction.sig_s, simpleTransaction.chainId,
-      transaction.getSender, transaction.getHash)
+      transaction.getSender, transaction.getHash, Option(transaction.getContractAddress))
   }
   implicit val encoder: Encoder[EnrichedEthereumTransaction] = Encoders.product[EnrichedEthereumTransaction]
 }
