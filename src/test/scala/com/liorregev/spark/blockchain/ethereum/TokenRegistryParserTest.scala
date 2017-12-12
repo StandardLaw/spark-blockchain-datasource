@@ -3,10 +3,10 @@ package com.liorregev.spark.blockchain.ethereum
 import com.liorregev.spark.blockchain._
 import com.liorregev.spark.blockchain.ethereum.datasource.EthereumTestUtils
 import com.liorregev.spark.blockchain.ethereum.model.EnrichedEthereumBlock
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.{functions => F}
+import org.apache.spark.sql.{SparkSession, functions => F}
 import org.scalatest.{FunSuite, Matchers}
 
+@SuppressWarnings(Array("org.wartremover.warts.Serializable"))
 class TokenRegistryParserTest extends FunSuite with EthereumTestUtils with Matchers {
   private lazy val spark: SparkSession = SparkSession.builder().master("local").getOrCreate()
 
@@ -26,7 +26,7 @@ class TokenRegistryParserTest extends FunSuite with EthereumTestUtils with Match
       "Neumark"
     )
 
-    val result = TokenRegistryParser.parseRegisterCalls(txn.data.getOrElse(Array.empty))
+    val result = TokenRegistryParser.parse(txn.data.getOrElse(Array.empty))
     result shouldBe defined
     result.foreach(_ should equal(expectedResult))
   }
