@@ -23,7 +23,7 @@ object EthereumBlockHeader {
     EthereumBlockHeader(blockHeader.getParentHash, blockHeader.getUnclesHash, blockHeader.getCoinbase,
       blockHeader.getStateRoot, blockHeader.getTxTrieRoot, blockHeader.getReceiptsRoot, blockHeader.getLogsBloom,
       blockHeader.getDifficulty, blockHeader.getTimestamp, blockHeader.getNumber,
-      blockHeader.getGasLimit.reverse.asLong, blockHeader.getGasUsed, blockHeader.getMixHash,
+      blockHeader.getGasLimit.asLong, blockHeader.getGasUsed, blockHeader.getMixHash,
       blockHeader.getExtraData, blockHeader.getNonce)
   implicit val encoder: Encoder[EthereumBlockHeader] = Encoders.product[EthereumBlockHeader]
 
@@ -62,7 +62,7 @@ object SimpleEthereumTransaction {
     val signature = transaction.getSignature
     val value = transaction.getValue
     SimpleEthereumTransaction(transaction.getNonce, if (ByteUtil.isSingleZero(value)) Array() else value,
-      transaction.getReceiveAddress, transaction.getGasPrice.reverse.asLong, transaction.getGasLimit.reverse.asLong,
+      transaction.getReceiveAddress, transaction.getGasPrice.asLong, transaction.getGasLimit.asLong,
       Option(transaction.getData), signature.v, signature.r.toByteArray,
       signature.s.toByteArray, Option(transaction.getChainId))
   }

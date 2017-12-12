@@ -28,7 +28,7 @@ final case class EthereumBlockRelation(location: String, enrich: Boolean)(@trans
       case unsignedDetector =>
         val noOfBytesSize = unsignedDetector - 0xf7
         val indicator = Array[Byte](detector) ++ data.slice(1, noOfBytesSize + 1)
-        indicator.length + indicator.tail.reverse.asInt
+        indicator.length + indicator.tail.asInt
     }
 
   }

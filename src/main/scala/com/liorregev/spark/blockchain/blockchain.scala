@@ -10,10 +10,15 @@ package object blockchain {
   @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   private[blockchain] implicit class ByteArrayOps(val value: Array[Byte]) extends AnyVal {
     def hex: String = value.map("%02x" format _).mkString
-    def asLong: Long = value.zipWithIndex.foldLeft(0L) {
-      case (sum, (currentByte, idx)) => sum + (currentByte & 0xFF) * Math.pow(256, idx.toDouble).toLong
+    def asLong: Long = {
+      val padded = Array.fill[Byte](java.lang.Long.BYTES - value.length){0} ++ value
+      ByteBuffer.wrap(padded).order(ByteOrder.BIG_ENDIAN).getLong
     }
-    def asInt: Int = asLong.toInt
+    def asInt: Int = {
+      val padded = Array.fill[Byte](java.lang.Integer.BYTES - value.length){0} ++ value
+      ByteBuffer.wrap(padded).order(ByteOrder.BIG_ENDIAN).getInt
+    }
+    def asBigInt: BigInt = BigInt(value)
   }
 
   private[blockchain] implicit class Bytes(val value: Long) extends AnyVal {

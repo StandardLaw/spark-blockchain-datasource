@@ -1,5 +1,6 @@
 package com.liorregev.spark.blockchain.ethereum.datasource
 
+import com.liorregev.spark.blockchain.ethereum.RegisterCall
 import com.liorregev.spark.blockchain.ethereum.model._
 import org.scalactic.Equality
 
@@ -12,11 +13,7 @@ trait EthereumTestUtils {
         productEquality(x, y)
       case (x: Array[_], y: Array[_]) =>
         x sameElements y
-      case (x: Long, y: Long) =>
-        x == y
-      case (x: Int, y: Int) =>
-        x == y
-      case (x: Byte, y: Byte) =>
+      case (x, y) =>
         x == y
     }
 
@@ -71,4 +68,10 @@ trait EthereumTestUtils {
           headersEqual && transactionsEqual && unclesEqual
         case _ => false
       }
+
+  implicit val registerCallEquality: Equality[RegisterCall] = (callA: RegisterCall, b: Any) => b match {
+    case (callB: RegisterCall) =>
+      productEquality(callA, callB)
+    case _ => false
+  }
 }
