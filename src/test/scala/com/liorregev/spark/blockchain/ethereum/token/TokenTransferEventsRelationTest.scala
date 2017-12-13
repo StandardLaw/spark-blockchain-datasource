@@ -259,4 +259,18 @@ class TokenTransferEventsRelationTest extends FunSuite with EthereumTestUtils
     mockServer2.getNumCalls should equal(0)
     parsed should contain theSameElementsAs expected
   }
+
+  test("Given enough blocks, the result Dataset should have `numPartitions` partitions") {
+    val result = spark.read.option("numPartitions", "132")
+      .tokenTransferEvents(3904411, 3904411 + 132 * 3, mockServer.start())
+    result.rdd.getNumPartitions should equal(132)
+  }
+
+  test("Given less than enough blocks, the result Dataset should have `numBlocks + 1` partitions") {
+    val fromBlock = 3904411L
+    val toBlock = fromBlock + 20
+    val result = spark.read.option("numPartitions", "132")
+      .tokenTransferEvents(fromBlock, toBlock, mockServer.start())
+    result.rdd.getNumPartitions should equal(toBlock - fromBlock + 1)
+  }
 }

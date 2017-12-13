@@ -14,7 +14,7 @@ object TokenTransferEvent {
   val topic: String = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
   implicit val encoder: Encoder[TokenTransferEvent] = Encoders.product[TokenTransferEvent]
 
-  private def parseEth1Log(log: LogObject): TokenTransferEvent = {
+  private def parseEthLog(log: LogObject): TokenTransferEvent = {
     val Seq(_, fromAddress, toAddress) = log.getTopics.asScala.map(_.drop(2)).map(_.bytes.drop(12))
     TokenTransferEvent(
       log.getAddress.drop(2).bytes,
@@ -30,7 +30,7 @@ object TokenTransferEvent {
   def fromEthLog(log: LogObject): Option[TokenTransferEvent] = {
     for {
       firstTopic <- log.getTopics.asScala.headOption
-      result <- if(firstTopic == topic) Option(parseEth1Log(log)) else None
+      result <- if(firstTopic == topic && log.getTopics.asScala.lengthCompare(3) == 0) Option(parseEthLog(log)) else None
     } yield result
   }
 }

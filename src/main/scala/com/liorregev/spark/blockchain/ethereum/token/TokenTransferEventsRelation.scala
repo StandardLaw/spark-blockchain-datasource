@@ -34,11 +34,12 @@ final case class TokenTransferEventsRelation(fromBlock: Long, toBlock: Long, num
 
   override def schema: StructType = TokenTransferEvent.encoder.schema
 
-  def createPartitionDefs(): Seq[((Long, Long), String)] = {
+  private final case class PartitionDef(partitionId: Int, fromBlock: Long, toBlock: Long, host: String)
+  private def createPartitionDefs(): Seq[PartitionDef] = {
     val numBlocks = toBlock - fromBlock + 1 // Add 1 because we are inclusive
     val partDefs = if(numBlocks < numPartitions) {
       (0 until numBlocks.toInt)
-        .map(partId => (fromBlock + partId, fromBlock + partId))
+        .map(partId => (partId, fromBlock + partId, fromBlock + partId))
     } else {
       val blocksPerPartition = Math.ceil(numBlocks.toDouble / numPartitions).toLong
       (0 until numPartitions)
@@ -49,24 +50,27 @@ final case class TokenTransferEventsRelation(fromBlock: Long, toBlock: Long, num
             } else {
               start + blocksPerPartition - 1
             }
-            (start, end)
+            (partId, start, end)
         })
     }
     partDefs
       .zip(Stream.continually(allHosts.toStream.map(_.getURL)).flatten)
+      .map {
+        case ((partId, from, to), currentHost) => PartitionDef(partId, from, to, currentHost)
+      }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Product"))
   override def buildScan(): RDD[Row] = {
     val partitionDefs = createPartitionDefs()
     sqlContext.sparkContext
-      .parallelize(partitionDefs)
+      .parallelize(partitionDefs, partitionDefs.length)
       .flatMap {
-        case ((from: Long, to: Long), currentHost: String) =>
-          val web3j = Web3j.build(new HttpService(currentHost))
+        partitionDef =>
+          val web3j = Web3j.build(new HttpService(partitionDef.host))
           val filter = new EthFilter(
-            DefaultBlockParameter.valueOf(BigInt(from).bigInteger),
-            DefaultBlockParameter.valueOf(BigInt(to).bigInteger),
+            DefaultBlockParameter.valueOf(BigInt(partitionDef.fromBlock).bigInteger),
+            DefaultBlockParameter.valueOf(BigInt(partitionDef.toBlock).bigInteger),
             (Nil: List[String]).asJava
           ).addSingleTopic(TokenTransferEvent.topic)
           web3j.ethGetLogs(filter).send()
