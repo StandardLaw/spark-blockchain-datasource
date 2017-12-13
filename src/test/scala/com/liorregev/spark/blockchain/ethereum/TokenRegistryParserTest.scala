@@ -1,8 +1,7 @@
 package com.liorregev.spark.blockchain.ethereum
 
 import com.liorregev.spark.blockchain._
-import com.liorregev.spark.blockchain.ethereum.datasource.EthereumTestUtils
-import com.liorregev.spark.blockchain.ethereum.model.EnrichedEthereumBlock
+import com.liorregev.spark.blockchain.ethereum.block.{EnrichedEthereumBlock, EthereumTestUtils}
 import org.apache.spark.sql.{SparkSession, functions => F}
 import org.scalatest.{FunSuite, Matchers}
 

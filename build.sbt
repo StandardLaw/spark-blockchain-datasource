@@ -28,14 +28,15 @@ lazy val defaultSettings = Seq(
   wartremoverErrors ++= Seq(
     Wart.StringPlusAny, Wart.FinalCaseClass, Wart.JavaConversions, Wart.Null, Wart.Product, Wart.Serializable,
     Wart.LeakingSealed, Wart.While, Wart.Return, Wart.ExplicitImplicitTypes, Wart.Enumeration, Wart.FinalVal,
-    Wart.TryPartial, Wart.TraversableOps, Wart.OptionPartial, Wart.ArrayEquals, ContribWart.SomeApply
+    Wart.TryPartial, Wart.TraversableOps, Wart.OptionPartial, ContribWart.SomeApply
   ),
 
   wartremoverWarnings ++= wartremover.Warts.allBut(
     Wart.Nothing, Wart.DefaultArguments, Wart.Throw, Wart.MutableDataStructures, Wart.NonUnitStatements, Wart.Overloading,
     Wart.Option2Iterable, Wart.ImplicitConversion, Wart.ImplicitParameter, Wart.Recursion,
     Wart.Any, Wart.Equals, // Too many warnings because of spark's Row
-    Wart.AsInstanceOf // Too many warnings because of bad DI practices
+    Wart.AsInstanceOf, // Too many warnings because of bad DI practices
+    Wart.ArrayEquals // Too many warnings because we're using byte arrays in Spark
   ),
 
   testFrameworks := Seq(TestFrameworks.ScalaTest),
@@ -55,16 +56,25 @@ lazy val defaultSettings = Seq(
   classpathTypes += "test-jar",
 
   libraryDependencies ++= Seq(
-    "com.google.guava"    %  "guava"                        % "14.0.1"                  % "provided,test",
-    "org.apache.spark"    %% "spark-core"                   % sparkVersion              % "provided,test",
-    "org.apache.spark"    %% "spark-sql"                    % sparkVersion              % "provided,test",
-    "org.apache.spark"    %% "spark-hive"                   % sparkVersion              % "provided,test",
-    "org.apache.spark"    %% "spark-catalyst"               % sparkVersion              % "provided,test",
-    "org.apache.spark"    %% "spark-core"                   % sparkVersion              % "test" classifier "tests",
-    "org.apache.spark"    %% "spark-sql"                    % sparkVersion              % "test" classifier "tests",
-    "org.apache.spark"    %% "spark-catalyst"               % sparkVersion              % "test" classifier "tests",
-    "org.ethereum"        %  "ethereumj-core"               % "1.6.3-RELEASE"           exclude("com.google.guava", "guava"),
-    "org.scalatest"       %% "scalatest"                    % "2.2.6"                   % "test"
+    "org.apache.spark"             %% "spark-core"                   % sparkVersion    % "provided,test",
+    "org.apache.spark"             %% "spark-sql"                    % sparkVersion    % "provided,test",
+    "org.apache.spark"             %% "spark-hive"                   % sparkVersion    % "provided,test",
+    "org.apache.spark"             %% "spark-catalyst"               % sparkVersion    % "provided,test",
+
+    "com.google.guava"             %  "guava"                        % "14.0.1"        % "provided,test",
+    "org.ethereum"                 %  "ethereumj-core"               % "1.6.3-RELEASE" exclude("com.google.guava", "guava"),
+    "com.fasterxml.jackson.module" %  "jackson-module-paranamer"     % "2.8.5",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"         % "2.8.5",
+    "org.web3j"                    %  "core"                         % "3.1.1",
+
+    "org.apache.spark"             %% "spark-core"                   % sparkVersion    % "test" classifier "tests",
+    "org.apache.spark"             %% "spark-sql"                    % sparkVersion    % "test" classifier "tests",
+    "org.apache.spark"             %% "spark-catalyst"               % sparkVersion    % "test" classifier "tests",
+    "org.apache.httpcomponents"    %  "httpclient"                   % "4.5.4"         % "test" classifier "tests",
+    "junit"                        %  "junit"                        % "4.11"          % "test",
+    "org.joda"                     %  "joda-convert"                 % "1.9.2"         % "test",
+    "com.typesafe.play"            %% "play-json"                    % "2.6.8"         % "test",
+    "org.scalatest"                %% "scalatest"                    % "2.2.6"         % "test"
   ),
 
   dependencyOverrides ++= Seq(

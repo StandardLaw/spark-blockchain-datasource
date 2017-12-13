@@ -1,10 +1,8 @@
-package com.liorregev.spark.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.block
 
 import java.io.InputStream
 
-import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, SimpleEthereumBlock}
 import com.liorregev.spark.blockchain._
-
 import org.apache.spark.input.PortableDataStream
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sources.{BaseRelation, TableScan}

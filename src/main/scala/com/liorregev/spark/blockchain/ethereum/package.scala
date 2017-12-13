@@ -1,18 +1,28 @@
 package com.liorregev.spark.blockchain
 
-import com.liorregev.spark.blockchain.ethereum.model.{EnrichedEthereumBlock, SimpleEthereumBlock}
+import com.liorregev.spark.blockchain.ethereum.block.{EnrichedEthereumBlock, SimpleEthereumBlock}
+import com.liorregev.spark.blockchain.ethereum.token.TokenTransferEvent
 import org.apache.spark.sql.{DataFrameReader, Dataset}
 
 package object ethereum {
-  /**
-    * Adds a method, `ethereum`, to DataFrameReader that allows you to read avro files using
-    * the DataFileReade
-    */
-  implicit class AvroDataFrameReader(reader: DataFrameReader) {
-    def ethereum: String => Dataset[SimpleEthereumBlock] = path => reader.option("enrich", "false")
-      .format("com.liorregev.spark.blockchain.ethereum").load(path).as[SimpleEthereumBlock]
+  implicit class EthereumDataFrameReader(reader: DataFrameReader) {
+    def ethereum(path: String): Dataset[SimpleEthereumBlock] = reader.option("enrich", "false")
+      .format("com.liorregev.spark.blockchain.ethereum.block").load(path).as[SimpleEthereumBlock]
 
-    def enrichedEthereum: String => Dataset[EnrichedEthereumBlock] = path => reader.option("enrich", "true")
-      .format("com.liorregev.spark.blockchain.ethereum").load(path).as[EnrichedEthereumBlock]
+    def enrichedEthereum(path: String): Dataset[EnrichedEthereumBlock] = reader.option("enrich", "true")
+      .format("com.liorregev.spark.blockchain.ethereum.block").load(path).as[EnrichedEthereumBlock]
+
+    def tokenTransferEvents(fromBlock: Long, toBlock: Long,
+                            host: String, hosts: String*): Dataset[TokenTransferEvent] = {
+      reader
+        .options(Map(
+          "fromBlock" -> fromBlock.toString,
+          "toBlock" -> toBlock.toString,
+          "hosts" -> (hosts :+ host).mkString(",")
+        ))
+        .format("com.liorregev.spark.blockchain.ethereum.token")
+        .load()
+        .as[TokenTransferEvent]
+    }
   }
 }

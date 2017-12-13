@@ -1,17 +1,12 @@
-package com.liorregev.spark.blockchain.ethereum.model
+package com.liorregev.spark.blockchain.ethereum.block
 
 import com.liorregev.spark.blockchain._
 import org.apache.spark.sql.{Encoder, Encoders}
-import org.ethereum.core.{
-  Block => EthereumjBlock,
-  BlockHeader => EthereumjBlockHeader,
-  Transaction => EthereumjTransaction
-}
+import org.ethereum.core.{Block => EthereumjBlock, BlockHeader => EthereumjBlockHeader, Transaction => EthereumjTransaction}
 import org.ethereum.util.ByteUtil
 
 import scala.collection.JavaConverters._
 
-@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
 final case class EthereumBlockHeader(parentHash: Array[Byte], uncleHash: Array[Byte], coinBase: Array[Byte],
                                      stateRoot: Array[Byte], txTrieRoot: Array[Byte], receiptTrieRoot: Array[Byte],
                                      logsBloom: Array[Byte], difficulty: Array[Byte], timestamp: Long, number: Long,
@@ -48,7 +43,6 @@ sealed trait EthereumTransaction {
   }
 }
 
-@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
 final case class SimpleEthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
                                      gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
                                      sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer])
@@ -95,7 +89,6 @@ object SimpleEthereumBlock {
   implicit val encoder: Encoder[SimpleEthereumBlock] = Encoders.product[SimpleEthereumBlock]
 }
 
-@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
 final case class EnrichedEthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
                                              gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
                                              sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer],

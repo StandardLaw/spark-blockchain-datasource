@@ -7,7 +7,6 @@ import org.ethereum.core.CallTransaction
 
 import scala.io.Source
 
-@SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
 final case class RegisterCall(address: Array[Byte], tla: String, base: BigDecimal, name: String)
 
 object RegisterCall {

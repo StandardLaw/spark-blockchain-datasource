@@ -3,11 +3,11 @@ package com.liorregev.spark
 import java.nio.{ByteBuffer, ByteOrder}
 
 package object blockchain {
-  implicit class Unhex(val value: String) extends AnyVal {
+  implicit class StringOps(val value: String) extends AnyVal {
     def bytes: Array[Byte] = value.grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
+    def hexToLong: Long = java.lang.Long.parseLong(value.replaceFirst("0x", ""), 16)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.ArrayEquals"))
   implicit class ByteArrayOps(val value: Array[Byte]) extends AnyVal {
     def hex: String = value.map("%02x" format _).mkString
     def asLong: Long = {

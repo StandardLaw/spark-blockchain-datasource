@@ -1,6 +1,5 @@
-package com.liorregev.spark.blockchain.ethereum
+package com.liorregev.spark.blockchain.ethereum.block
 
-import com.liorregev.spark.blockchain.ethereum.datasource.EthereumBlockRelation
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.sources.{BaseRelation, RelationProvider}
 

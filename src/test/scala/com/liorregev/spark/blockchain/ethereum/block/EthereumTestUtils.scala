@@ -1,7 +1,7 @@
-package com.liorregev.spark.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.block
 
 import com.liorregev.spark.blockchain.ethereum.RegisterCall
-import com.liorregev.spark.blockchain.ethereum.model._
+import com.liorregev.spark.blockchain.ethereum.token.TokenTransferEvent
 import org.scalactic.Equality
 
 
@@ -71,6 +71,12 @@ trait EthereumTestUtils {
 
   implicit val registerCallEquality: Equality[RegisterCall] = (callA: RegisterCall, b: Any) => b match {
     case (callB: RegisterCall) =>
+      productEquality(callA, callB)
+    case _ => false
+  }
+
+  implicit val tokenTransferEquality: Equality[TokenTransferEvent] = (callA: TokenTransferEvent, b: Any) => b match {
+    case (callB: TokenTransferEvent) =>
       productEquality(callA, callB)
     case _ => false
   }

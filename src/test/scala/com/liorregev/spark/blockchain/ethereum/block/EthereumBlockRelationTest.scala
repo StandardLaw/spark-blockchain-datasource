@@ -1,10 +1,9 @@
-package com.liorregev.spark.blockchain.ethereum.datasource
+package com.liorregev.spark.blockchain.ethereum.block
 
 import java.time.Instant
 
 import com.liorregev.spark.blockchain._
 import com.liorregev.spark.blockchain.ethereum._
-import com.liorregev.spark.blockchain.ethereum.model._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSuite, Matchers}
 
