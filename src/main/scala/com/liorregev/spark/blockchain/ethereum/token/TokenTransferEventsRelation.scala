@@ -1,5 +1,8 @@
 package com.liorregev.spark.blockchain.ethereum.token
 
+import java.util.concurrent.TimeUnit
+
+import okhttp3.OkHttpClient
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sources.{BaseRelation, TableScan}
 import org.apache.spark.sql.types._
@@ -25,7 +28,7 @@ object SourceHost {
   }
 }
 
-final case class TokenTransferEventsRelation(fromBlock: Long, toBlock: Long, numPartitions: Int,
+final case class TokenTransferEventsRelation(fromBlock: Long, toBlock: Long, numPartitions: Int, timeoutSeconds: Long,
                                              host: SourceHost, hosts: SourceHost*)
                                             (@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan with Serializable {
@@ -67,7 +70,12 @@ final case class TokenTransferEventsRelation(fromBlock: Long, toBlock: Long, num
       .parallelize(partitionDefs, partitionDefs.length)
       .flatMap {
         partitionDef =>
-          val web3j = Web3j.build(new HttpService(partitionDef.host))
+          val client: OkHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
+            .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+            .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
+            .build()
+          val web3j = Web3j.build(new HttpService(partitionDef.host, client, false))
           val filter = new EthFilter(
             DefaultBlockParameter.valueOf(BigInt(partitionDef.fromBlock).bigInteger),
             DefaultBlockParameter.valueOf(BigInt(partitionDef.toBlock).bigInteger),
