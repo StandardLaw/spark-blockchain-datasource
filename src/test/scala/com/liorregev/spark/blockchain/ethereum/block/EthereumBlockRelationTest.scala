@@ -28,7 +28,7 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
       "6574682e70702e7561".bytes,
       "8b1a47758a1d7472".bytes
     )
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block447533.bin").toString
     val blocks = spark.read.ethereum(path).collect()
     blocks.length should be(1)
 
@@ -41,26 +41,26 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
       "0047a8033cc6d6ca2ed5044674fd421f44884de8".bytes,
       "2910543af39aba0cd09dbb2d50200b3e800a63d2".bytes
     )
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block447533.bin").toString
     val blocks = spark.read.enrichedEthereum(path).collect()
     blocks.flatMap(_.ethereumTransactions).map(_.sendAddress) should contain theSameElementsInOrderAs transactionSenders
   }
 
   test("Correctly parse senders in block 84546") {
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block84546.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block84546.bin").toString
     val blocks = spark.read.enrichedEthereum(path).collect()
     blocks.flatMap(_.ethereumTransactions).map(_.sendAddress.hex).head should be("c4c6baf00209a0f33331e4b7cb1c7b680a3d2f79")
   }
 
   test("Correctly parse senders in block 2800597 with post-parse enrichment") {
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block2800597.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block2800597.bin").toString
     val blocks = spark.read.ethereum(path).collect()
     val transaction = blocks.flatMap(_.ethereumTransactions).head.toEnriched
     transaction.sendAddress.hex should be("32be343b94f860124dc4fee278fdcbd38c102d88")
   }
 
   test("Parsing enriched blocks and enriching block after parsing yields the same results for block 447533") {
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block447533.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block447533.bin").toString
     val blocks = spark.read.ethereum(path).collect()
     val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 
@@ -68,7 +68,7 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
   }
 
   test("Parsing enriched blocks and enriching block after parsing yields the same results for block 2800597") {
-    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/block2800597.bin").toString
+    val path = getClass.getResource("/com/liorregev/spark/blockchain/ethereum/blocks/block2800597.bin").toString
     val blocks = spark.read.ethereum(path).collect()
     val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 

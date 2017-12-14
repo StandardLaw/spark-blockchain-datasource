@@ -12,7 +12,7 @@ class DefaultSource extends RelationProvider  {
       throw new IllegalArgumentException("Please specify toBlock")).toLong
     val numPartitions = parameters.getOrElse("numPartitions",
       sqlContext.getConf(SQLConf.SHUFFLE_PARTITIONS.key)).toInt
-    val timeout = parameters.getOrElse("timeoutSeconds", "180").toInt
+    val timeout = parameters.getOrElse("timeoutSeconds", "180").toLong
     val hosts = (parameters.get("hosts") orElse parameters.get("path"))
       .getOrElse(throw new IllegalArgumentException("Please specify hosts or path"))
       .split(',')
