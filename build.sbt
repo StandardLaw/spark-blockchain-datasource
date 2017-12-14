@@ -63,6 +63,7 @@ lazy val defaultSettings = Seq(
 
     "com.google.guava"             %  "guava"                        % "14.0.1"        % "provided,test",
     "org.ethereum"                 %  "ethereumj-core"               % "1.6.3-RELEASE" exclude("com.google.guava", "guava"),
+    "org.bitcoinj"                 %  "bitcoinj-core"                % "0.14.5"        exclude("com.google.guava", "guava"),
     "com.fasterxml.jackson.module" %  "jackson-module-paranamer"     % "2.8.5",
     "com.fasterxml.jackson.module" %% "jackson-module-scala"         % "2.8.5",
     "org.web3j"                    %  "core"                         % "3.1.1",
