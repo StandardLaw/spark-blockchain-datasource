@@ -68,11 +68,8 @@ lazy val defaultSettings = Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala"         % "2.8.5",
     "org.web3j"                    %  "core"                         % "3.1.1",
 
-    "org.apache.spark"             %% "spark-core"                   % sparkVersion    % "test" classifier "tests",
-    "org.apache.spark"             %% "spark-sql"                    % sparkVersion    % "test" classifier "tests",
-    "org.apache.spark"             %% "spark-catalyst"               % sparkVersion    % "test" classifier "tests",
     "org.apache.httpcomponents"    %  "httpclient"                   % "4.5.4"         % "test" classifier "tests",
-    "junit"                        %  "junit"                        % "4.11"          % "test",
+    "junit"                        %  "junit"                        % "4.12"          % "test",
     "org.joda"                     %  "joda-convert"                 % "1.9.2"         % "test",
     "com.typesafe.play"            %% "play-json"                    % "2.6.8"         % "test",
     "org.scalatest"                %% "scalatest"                    % "2.2.6"         % "test"
