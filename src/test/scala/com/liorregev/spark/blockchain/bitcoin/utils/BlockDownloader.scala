@@ -15,8 +15,8 @@ import scala.sys.process._
 
 object BlockDownloader extends App {
   // Change these when you need to download a new block
-  val blockHeights: Seq[Int] = Seq(68956)
-  val analyzeOutputProviders: Boolean = false
+  val blockHeights: Seq[Int] = Seq(403617)
+  val analyzeOutputProviders: Boolean = false // This takes a while. Use it if you need complete data about values for inputs.
   // -------------------------------------
 
   private val network: NetworkParameters = MainNetParams.get()

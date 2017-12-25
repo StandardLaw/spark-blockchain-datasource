@@ -43,27 +43,41 @@ final case class Relation(location: String, network: String)
   }
 
   private def outputToAddress(output: TransactionOutput): Option[String] = {
-    val script = output.getScriptPubKey
+    try {
+      val script = output.getScriptPubKey
 
-    if (script.isSentToAddress || script.isPayToScriptHash) {
-      Option(script.getToAddress(networkParameters).toString)
+      if (script.isSentToAddress || script.isPayToScriptHash) {
+        Option(script.getToAddress(networkParameters).toString)
 
-    } else if (script.isSentToRawPubKey) {
-      Option(ECKey.fromPublicOnly(script.getPubKey).toAddress(networkParameters).toString)
+      } else if (script.isSentToRawPubKey) {
+        Option(ECKey.fromPublicOnly(script.getPubKey).toAddress(networkParameters).toString)
 
-    } else if (script.isSentToMultiSig) {
-      None // Multisig doesn't have an address
+      } else if (script.isSentToMultiSig) {
+        None // Multisig doesn't have an address
 
-    } else {
-      None // Unknown
+      } else {
+        None // Unknown
+      }
+    } catch {
+      case _: ScriptException =>
+        // TODO: Log
+        None
     }
   }
 
   private def blockToTransactions(block: Block): Seq[Transaction] = {
     block.getTransactions.asScala
       .map { transaction =>
+        val actualLockTime =
+          // If the lock time is before the Genesis Block's time, it's probably specifying a block height and not a time
+          if (transaction.getLockTime >= 1230999305000L) {
+            transaction.getLockTime
+          } else {
+            0L
+          }
+
         // Estimate the time
-        val time = Seq(transaction.getUpdateTime.getTime, transaction.getLockTime, block.getTimeSeconds * 1000)
+        val time = Seq(transaction.getUpdateTime.getTime, actualLockTime, block.getTimeSeconds * 1000)
           .filter(_ > 0L)
           .min
 

@@ -43,6 +43,36 @@ class IORelationTests extends FunSuite with Matchers {
     sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.01)
   }
 
+  test("Correctly parse IO from block version 3 (block 370505)") {
+    val path = getClass.getResource("blocks/version3").toString
+    val actual: Seq[IO] = spark
+      .read
+      .bitcoinIO(path)
+      .filter((io: IO) => io.blockHash.hex == "00000000000000000bf52d66c6e96aeb60cf1e3d7a07d7e55defaec9b6458845")
+      .collect()
+      .toSeq
+
+    val expected = Json.parse(getClass.getResourceAsStream("expected/370505.json"))
+      .as[Seq[ComparableIO]]
+
+    sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.06) // Note: Threshold is higher here
+  }
+
+  test("Correctly parse IO from block version 4 (block 403617)") {
+    val path = getClass.getResource("blocks/version4").toString
+    val actual: Seq[IO] = spark
+      .read
+      .bitcoinIO(path)
+      .filter((io: IO) => io.blockHash.hex == "00000000000000000245be9dd046492886b4527c7fa3494f26a9a9d876ecea22")
+      .collect()
+      .toSeq
+
+    val expected = Json.parse(getClass.getResourceAsStream("expected/403617.json"))
+      .as[Seq[ComparableIO]]
+
+    sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.04) // Note: Threshold is higher here
+  }
+
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
   private def sameIO(actualSeq: GenTraversable[ComparableIO], expectedSeq: Seq[ComparableIO], allValuesMustExist: Boolean, unknownAddressThreshold: Double): Unit = {
     actualSeq.size should equal(expectedSeq.size)
