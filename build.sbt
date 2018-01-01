@@ -9,7 +9,7 @@ val sparkVersion = "2.2.0"
 val sparkScalaVersion = "2.11.8" // Spark relies on a specific version of Scala (including for some hacks)
 
 lazy val defaultSettings = Seq(
-  organization := "com.liorregev",
+  organization := "com.endor",
   scalaVersion := sparkScalaVersion,
 
   javaOptions ++= Seq("-Xms512M", "-Xmx8192M", "-XX:MaxPermSize=2048M", "-XX:+CMSClassUnloadingEnabled"),
@@ -87,6 +87,7 @@ lazy val assemblySettings = Seq(
   assemblyMergeStrategy in assembly := {
     case x if x.endsWith("application.conf") => MergeStrategy.first
     case x if x.endsWith(".class") => MergeStrategy.last
+    case x if x.endsWith("version.properties") => MergeStrategy.concat
     case x if x.endsWith(".properties") => MergeStrategy.last
     case x if x.contains("/resources/") => MergeStrategy.last
     case x if x.startsWith("META-INF/mailcap") => MergeStrategy.last
