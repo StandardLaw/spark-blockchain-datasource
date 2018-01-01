@@ -1,11 +1,14 @@
 package com.liorregev.spark.blockchain.ethereum.block
 
+import java.security._
 import java.time.Instant
 
 import com.liorregev.spark.blockchain._
 import com.liorregev.spark.blockchain.ethereum._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSuite, Matchers}
+import sun.security.ec.{ECPrivateKeyImpl, ECPublicKeyImpl}
+import javax.crypto.KeyAgreement
 
 @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
 class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Matchers {
@@ -73,5 +76,33 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
     val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
 
     blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks
+  }
+
+  test("ecc") {
+    val kpg = KeyPairGenerator.getInstance("EC","SunEC")
+
+    val kp1 = {
+      val bytes = "614c8463820096a59def38ec4531a95d7bdd835603880bf9cb9524fc7ce5d76f46c947f9f49fb9aed34962a370c8a0603736e1f5e55b4eaa36ef7e25aefa8ec9".bytes
+      val pubKey = new ECPublicKeyImpl(bytes)
+      val privateKey = new ECPrivateKeyImpl("0096f064b09fcc6dfcb39771060c14f090d22ac8dce1dd5ce6f35c9cb62a912150".bytes)
+      new KeyPair(pubKey, privateKey)
+    }
+
+    val kp2 = {
+      val pubKey = new ECPublicKeyImpl("82147bcb23c6508b9129fac8116a02b5a189694aa90a75939f6cb5e283eeb0c458af8a1a693ed2214be5b6819093eb15a03fca000adf5c776f66ebebf9b9280a".bytes)
+      val privateKey = new ECPrivateKeyImpl("3dbfc2bf67f194d36edb90971149ba7d53369eed86fdd9b8cbace067c530c214".bytes)
+      new KeyPair(pubKey, privateKey)
+    }
+
+    val ecdhU = KeyAgreement.getInstance("ECDH")
+    ecdhU.init(kp1.getPrivate)
+    ecdhU.doPhase(kp2.getPublic, true)
+
+    val ecdhV = KeyAgreement.getInstance("ECDH")
+    ecdhV.init(kp2.getPrivate)
+    ecdhV.doPhase(kp1.getPublic, true)
+
+    println("Secret computed by U: 0x" + BigInt(1, ecdhU.generateSecret()).toString(16).toUpperCase())
+    println("Secret computed by V: 0x" + BigInt(1, ecdhV.generateSecret()).toString(16).toUpperCase())
   }
 }
