@@ -7,7 +7,7 @@ import org.web3j.protocol.core.methods.response.EthLog.LogObject
 import scala.collection.JavaConverters._
 
 final case class TokenTransferEvent(contractAddress: Array[Byte], fromAddress: Array[Byte], toAddress: Array[Byte],
-                                    value: Double, blockNumber: Long, transactionHash: Array[Byte],
+                                    value: Array[Byte], blockNumber: Long, transactionHash: Array[Byte],
                                     transactionIndex: Int)
 
 object TokenTransferEvent {
@@ -20,7 +20,7 @@ object TokenTransferEvent {
       log.getAddress.drop(2).bytes,
       fromAddress,
       toAddress,
-      BigDecimal(BigInt(log.getData.drop(2).bytes)).doubleValue(),
+      log.getData.drop(2).bytes,
       log.getBlockNumber.longValue(),
       log.getTransactionHash.drop(2).bytes,
       log.getTransactionIndex.intValue()
