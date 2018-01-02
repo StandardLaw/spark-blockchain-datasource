@@ -4,9 +4,13 @@ import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.types.{DataType, DataTypes, StructType}
 
-class ByteArraySummer extends UserDefinedAggregateFunction {
+class ByteArraySummer(singedValue: Boolean) extends UserDefinedAggregateFunction {
   private def padArray(input: Array[Byte]): Array[Byte] =
-    Array.fill[Byte](Math.max(java.lang.Long.BYTES - input.length, 1)){0} ++ input
+    if(singedValue) {
+      input
+    } else {
+      Array.fill[Byte](Math.max(java.lang.Long.BYTES - input.length, 1))(0) ++ input
+    }
 
   override def inputSchema: StructType = new StructType().add("binaryInput", DataTypes.BinaryType)
   override def bufferSchema: StructType = new StructType().add("binaryInput", DataTypes.BinaryType)

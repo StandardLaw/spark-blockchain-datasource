@@ -44,8 +44,8 @@ sealed trait EthereumTransaction {
 }
 
 final case class SimpleEthereumTransaction(nonce: Array[Byte], value: Array[Byte], receiveAddress: Array[Byte],
-                                     gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
-                                     sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer])
+                                           gasPrice: Long, gasLimit: Long, data: Option[Array[Byte]], sig_v: Byte,
+                                           sig_r: Array[Byte], sig_s: Array[Byte], chainId: Option[java.lang.Integer])
   extends EthereumTransaction {
 
   def toEnriched: EnrichedEthereumTransaction = EnrichedEthereumTransaction.fromEthereumjTransaction(toEthereumj)
