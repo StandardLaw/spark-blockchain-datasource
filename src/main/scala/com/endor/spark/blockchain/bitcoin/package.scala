@@ -1,30 +1,20 @@
 package com.endor.spark.blockchain
 
-import com.endor.spark.blockchain.bitcoin.io.IO
-import com.endor.spark.blockchain.bitcoin.transaction._
+import com.endor.spark.blockchain.bitcoin.transactions.Transaction
 import org.apache.spark.sql.{DataFrameReader, Dataset}
-import org.bitcoinj.core.NetworkParameters
 
 package object bitcoin {
   type Hash = Array[Byte]
-  
-  implicit class BitcoinDataFrameReader(reader: DataFrameReader) {
-    def bitcoin(path: String, id: String = NetworkParameters.PAYMENT_PROTOCOL_ID_MAINNET): Dataset[Transaction] = { // TODO: CoProduct instead of String
-      reader
-//      .option("enrich", "false")
-        .option("network", id)
-        .format("com.endor.spark.blockchain.bitcoin.transaction")
-        .load(path)
-        .as[Transaction]
-    }
 
-    def bitcoinIO(path: String, id: String = NetworkParameters.PAYMENT_PROTOCOL_ID_MAINNET): Dataset[IO] = {
-      reader
-//      .option("enrich", "false")
-        .option("network", id)
-        .format("com.endor.spark.blockchain.bitcoin.io")
-        .load(path)
-        .as[IO]
+  implicit class RawBitcoinDataFrameReader(reader: DataFrameReader) {
+    def bitcoin(implicit network: Network = Network.Main): { def transactions(path: String): Dataset[Transaction] } = new {
+      def transactions(path: String): Dataset[Transaction] = {
+        reader
+          .option("network", network.id)
+          .format("com.endor.spark.blockchain.bitcoin.transactions")
+          .load(path)
+          .as[Transaction]
+      }
     }
   }
 }

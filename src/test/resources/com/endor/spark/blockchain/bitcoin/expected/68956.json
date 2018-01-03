@@ -5,7 +5,7 @@
   "value" : 5001000000,
   "isInput" : false,
   "index" : 0,
-  "blockTimeMs" : 1279500112000
+  "timeMs" : 1279500112000
 }, {
   "blockHash" : "0000000000bef5d742ad3ea3fab0548bf33077a6a91426f37e6ea90bf40205dd",
   "transactionHash" : "8acc1082a9f4260065fb22d24700b2c0a5efb8fa18767aa8f40e91b3036b1515",
@@ -13,7 +13,7 @@
   "value" : -32000000,
   "isInput" : true,
   "index" : 0,
-  "blockTimeMs" : 1279500112000
+  "timeMs" : 1279500112000
 }, {
   "blockHash" : "0000000000bef5d742ad3ea3fab0548bf33077a6a91426f37e6ea90bf40205dd",
   "transactionHash" : "8acc1082a9f4260065fb22d24700b2c0a5efb8fa18767aa8f40e91b3036b1515",
@@ -21,7 +21,7 @@
   "value" : 5000000,
   "isInput" : false,
   "index" : 0,
-  "blockTimeMs" : 1279500112000
+  "timeMs" : 1279500112000
 }, {
   "blockHash" : "0000000000bef5d742ad3ea3fab0548bf33077a6a91426f37e6ea90bf40205dd",
   "transactionHash" : "8acc1082a9f4260065fb22d24700b2c0a5efb8fa18767aa8f40e91b3036b1515",
@@ -29,5 +29,5 @@
   "value" : 26000000,
   "isInput" : false,
   "index" : 1,
-  "blockTimeMs" : 1279500112000
+  "timeMs" : 1279500112000
 } ]

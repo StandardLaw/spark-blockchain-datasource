@@ -71,11 +71,11 @@ object BlockDownloader extends App {
     val allIO = jsonBlock.tx.flatMap { tx =>
       val inputs = tx.inputs.zipWithIndex
         .collect { case (Input(Some(output)), index) =>
-          IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = true, index.toLong, jsonBlock.time * 1000)
+          IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = true, index.toLong, Option(jsonBlock.time * 1000))
         }
 
       val outputs = tx.out.zipWithIndex.map { case (output, index) =>
-        IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = false, index.toLong, jsonBlock.time * 1000)
+        IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = false, index.toLong, Option(jsonBlock.time * 1000))
       }
 
       inputs ++ outputs

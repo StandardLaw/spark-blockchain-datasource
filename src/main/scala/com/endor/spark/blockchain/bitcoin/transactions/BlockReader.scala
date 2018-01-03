@@ -1,26 +1,24 @@
-package com.endor.spark.blockchain.bitcoin
+package com.endor.spark.blockchain.bitcoin.transactions
 
 import java.io.InputStream
 import java.nio.{ByteBuffer, ByteOrder}
 
-import com.endor.spark.blockchain.bitcoin.BlockReader.EOF
 import org.bitcoinj.core.{Block, MessageSerializer, NetworkParameters}
 
 import scala.util.{Failure, Success, Try}
 
 final class BlockReader(stream: InputStream, networkParameters: NetworkParameters) {
+  import BlockReader._
+
   // This logic is ripped from org.bitcoinj.utils.BlockFileLoader
   def nextBlock: Try[Either[EOF.type, Block]] = {
     // Figure out if the magic is happening
-    readPossibleMagic()
+    verifyPossibleMagic()
       .flatMap {
-        case Right(readMagic) if readMagic == networkParameters.getPacketMagic =>
+        case None =>
           readPossibleLength()
 
-        case Right(readMagic) =>
-          Failure(new Exception(f"Bad magic $readMagic%02x, expected ${networkParameters.getPacketMagic}%02x"))
-
-        case Left(_) =>
+        case Some(EOF) =>
           Success(Left(EOF))
       }
       .flatMap {
@@ -50,18 +48,44 @@ final class BlockReader(stream: InputStream, networkParameters: NetworkParameter
       }
   }
 
-  private def readPossibleMagic(): Try[Either[EOF.type, Long]] = {
+  private def verifyPossibleMagic(): Try[Option[EOF.type]] = {
+    val expectedMagic = networkParameters.getPacketMagic.toInt
     val magicLength = Integer.BYTES
-    val readBytes = new Array[Byte](magicLength)
+    val firstByteOfMagic = ByteBuffer.allocate(magicLength).order(ByteOrder.BIG_ENDIAN).putInt(expectedMagic).get(0).toInt & 0xff
 
-    Try(stream.read(readBytes, 0, readBytes.length))
-      .map {
-        case count if count < readBytes.length => Left(EOF)
-        case _ => Right {
-          val padded: Array[Byte] = Array.fill(java.lang.Long.BYTES - readBytes.length)(0.toByte) ++ readBytes
-          ByteBuffer.wrap(padded).order(ByteOrder.BIG_ENDIAN).getLong
-        }
+    val possiblyActualMagic: Try[Either[EOF.type, Int]] = Try {
+      val eofOrHeadOfMagic = Stream.continually(stream.read())
+        .dropWhile(byte => byte != -1 && byte != firstByteOfMagic)
+        .headOption
+
+      eofOrHeadOfMagic match {
+        case Some(-1) =>
+          Left(EOF)
+
+        case _ =>
+          val readBytes = new Array[Byte](magicLength)
+          readBytes(0) = firstByteOfMagic.toByte
+
+          stream.read(readBytes, 1, readBytes.length - 1) match {
+            case count if count < readBytes.length - 1 =>
+              Left(EOF)
+
+            case _ =>
+              Right(ByteBuffer.wrap(readBytes).order(ByteOrder.BIG_ENDIAN).getInt)
+          }
       }
+    }
+
+    possiblyActualMagic match {
+      case Success(Left(_)) =>
+        Success(Option(EOF))
+      case Success(Right(actualMagic)) if actualMagic == expectedMagic =>
+        Success(None)
+      case Success(Right(actualMagic)) =>
+        Failure(new Exception(f"Bad magic $actualMagic%02x, expected $expectedMagic%02x"))
+      case Failure(ex) =>
+        Failure(ex)
+    }
   }
 }
 

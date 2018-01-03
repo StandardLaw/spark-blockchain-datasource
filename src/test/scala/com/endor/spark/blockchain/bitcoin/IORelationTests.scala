@@ -1,7 +1,7 @@
 package com.endor.spark.blockchain.bitcoin
 
 import com.endor.spark.blockchain._
-import com.endor.spark.blockchain.bitcoin.io.IO
+import com.endor.spark.blockchain.bitcoin.io._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.json.{Json, OFormat}
@@ -17,7 +17,9 @@ class IORelationTests extends FunSuite with Matchers {
     val path = getClass.getResource("blocks/version1").toString
     val actual: Seq[IO] = spark
       .read
-      .bitcoinIO(path)
+      .bitcoin
+      .transactions(path)
+      .toIO
       .filter((io: IO) => io.blockHash.hex == "0000000000bef5d742ad3ea3fab0548bf33077a6a91426f37e6ea90bf40205dd")
       .collect()
       .toSeq
@@ -32,7 +34,9 @@ class IORelationTests extends FunSuite with Matchers {
     val path = getClass.getResource("blocks/version2").toString
     val actual: Seq[IO] = spark
       .read
-      .bitcoinIO(path)
+      .bitcoin
+      .transactions(path)
+      .toIO
       .filter((io: IO) => io.blockHash.hex == "000000000000000007e5cc6f598ac0d10d5c0ae2abacef7373b83914c715636d")
       .collect()
       .toSeq
@@ -47,7 +51,9 @@ class IORelationTests extends FunSuite with Matchers {
     val path = getClass.getResource("blocks/version3").toString
     val actual: Seq[IO] = spark
       .read
-      .bitcoinIO(path)
+      .bitcoin
+      .transactions(path)
+      .toIO
       .filter((io: IO) => io.blockHash.hex == "00000000000000000bf52d66c6e96aeb60cf1e3d7a07d7e55defaec9b6458845")
       .collect()
       .toSeq
@@ -62,7 +68,9 @@ class IORelationTests extends FunSuite with Matchers {
     val path = getClass.getResource("blocks/version4").toString
     val actual: Seq[IO] = spark
       .read
-      .bitcoinIO(path)
+      .bitcoin
+      .transactions(path)
+      .toIO
       .filter((io: IO) => io.blockHash.hex == "00000000000000000245be9dd046492886b4527c7fa3494f26a9a9d876ecea22")
       .collect()
       .toSeq
@@ -85,7 +93,7 @@ class IORelationTests extends FunSuite with Matchers {
           actual.transactionHash should equal(expected.transactionHash)
           actual.isInput should equal(expected.isInput)
           actual.index should equal(expected.index)
-          actual.blockTimeMs should equal(expected.blockTimeMs)
+          actual.timeMs should equal(expected.timeMs)
 
           (actual.value, expected.value) match {
             case (_, None) =>
@@ -117,10 +125,10 @@ class IORelationTests extends FunSuite with Matchers {
 }
 
 object IORelationTests {
-  final case class ComparableIO(blockHash: String, transactionHash: String, address: Option[String], value: Option[Long], isInput: Boolean, index: Long, blockTimeMs: Long)
+  final case class ComparableIO(blockHash: String, transactionHash: String, address: Option[String], value: Option[Long], isInput: Boolean, index: Long, timeMs: Option[Long])
 
-  def comparable(otherIO: IO): ComparableIO = {
-    ComparableIO(otherIO.blockHash.hex, otherIO.transactionHash.hex, otherIO.address, otherIO.value, otherIO.isInput, otherIO.index, otherIO.blockTimeMs)
+  def comparable(io: IO): ComparableIO = {
+    ComparableIO(io.blockHash.hex, io.transactionHash.hex, io.address, io.value, io.isInput, io.index, io.timeMs)
   }
 
   implicit class ComparableSeq[T <: GenTraversable[IO]](value: T) {
