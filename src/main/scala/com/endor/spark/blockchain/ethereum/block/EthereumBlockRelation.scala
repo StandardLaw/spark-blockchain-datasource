@@ -10,13 +10,9 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
 import org.ethereum.core.Block
 
-final case class EthereumBlockRelation(enrich: Boolean, locations: String*)(@transient val sqlContext: SQLContext)
+final case class EthereumBlockRelation(locations: String*)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan with Serializable {
-  override def schema: StructType = if(enrich) {
-    EnrichedEthereumBlock.encoder.schema
-  } else {
-    SimpleEthereumBlock.encoder.schema
-  }
+  override def schema: StructType = SimpleEthereumBlock.encoder.schema
 
   private def parseRLPLengthWithIndicator(data: Array[Byte]): Int = {
     val detector = data(0)
@@ -80,13 +76,7 @@ final case class EthereumBlockRelation(enrich: Boolean, locations: String*)(@tra
   @SuppressWarnings(Array("org.wartremover.warts.Product"))
   override def buildScan(): RDD[Row] = {
     val simpleScan = buildSimpleScan()
-    if(enrich) {
-      simpleScan
-        .map((block: SimpleEthereumBlock) => block.toEnriched)
-        .map(Row.fromTuple)
-    } else {
-      simpleScan
-        .map(Row.fromTuple)
-    }
+    simpleScan
+      .map(Row.fromTuple)
   }
 }

@@ -58,20 +58,4 @@ class EthereumBlockRelationTest extends FunSuite with EthereumTestUtils with Mat
     val transaction = blocks.flatMap(_.ethereumTransactions).head.toEnriched
     transaction.sendAddress.hex should be("32be343b94f860124dc4fee278fdcbd38c102d88")
   }
-
-  test("Parsing enriched blocks and enriching block after parsing yields the same results for block 447533") {
-    val path = getClass.getResource("/com/endor/spark/blockchain/ethereum/blocks/block447533.bin").toString
-    val blocks = spark.read.ethereum(path).collect()
-    val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
-
-    blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks
-  }
-
-  test("Parsing enriched blocks and enriching block after parsing yields the same results for block 2800597") {
-    val path = getClass.getResource("/com/endor/spark/blockchain/ethereum/blocks/block2800597.bin").toString
-    val blocks = spark.read.ethereum(path).collect()
-    val enrichedBlocks = spark.read.enrichedEthereum(path).collect()
-
-    blocks.map(_.toEnriched) should contain theSameElementsInOrderAs  enrichedBlocks
-  }
 }

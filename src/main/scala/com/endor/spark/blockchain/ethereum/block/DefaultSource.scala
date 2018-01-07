@@ -9,8 +9,7 @@ class DefaultSource extends RelationProvider with StreamSourceProvider  {
   override def createRelation(sqlContext: SQLContext, parameters: Map[String, String]): BaseRelation = {
     val path =
       parameters.getOrElse("path", sys.error("'path' must be specified with files containing Ethereum blockchain data."))
-    val enrich = parameters.getOrElse("enrich", "false").toBoolean
-    EthereumBlockRelation(enrich, path)(sqlContext)
+    EthereumBlockRelation(path)(sqlContext)
   }
 
   override def sourceSchema(sqlContext: SQLContext, schema: Option[StructType],
