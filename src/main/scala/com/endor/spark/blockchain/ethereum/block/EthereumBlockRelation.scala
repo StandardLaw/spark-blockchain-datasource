@@ -10,7 +10,7 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
 import org.ethereum.core.Block
 
-final case class EthereumBlockRelation(location: String, enrich: Boolean)(@transient val sqlContext: SQLContext)
+final case class EthereumBlockRelation(enrich: Boolean, locations: String*)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan with Serializable {
   override def schema: StructType = if(enrich) {
     EnrichedEthereumBlock.encoder.schema
@@ -66,20 +66,27 @@ final case class EthereumBlockRelation(location: String, enrich: Boolean)(@trans
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Product"))
-  override def buildScan(): RDD[Row] = {
-    val toBlockFunction = if(enrich) {
-      (block: Block) => Row.fromTuple(EnrichedEthereumBlock.fromEthereumjBlock(block))
-    } else {
-      (block: Block) => Row.fromTuple(SimpleEthereumBlock.fromEthereumjBlock(block))
-    }
+  def buildSimpleScan(): RDD[SimpleEthereumBlock] = {
     sqlContext.sparkContext
-      .binaryFiles(location)
+      .binaryFiles(locations.mkString(","))
       .flatMap {
         case (_: String, data: PortableDataStream) =>
           val is = data.open()
           Stream.continually(()).map(_ => readSingleBlock(is)).takeWhile(_.isDefined).flatten
       }
-      .map(toBlockFunction)
+      .map((block: Block) => SimpleEthereumBlock.fromEthereumjBlock(block))
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Product"))
+  override def buildScan(): RDD[Row] = {
+    val simpleScan = buildSimpleScan()
+    if(enrich) {
+      simpleScan
+        .map((block: SimpleEthereumBlock) => block.toEnriched)
+        .map(Row.fromTuple)
+    } else {
+      simpleScan
+        .map(Row.fromTuple)
+    }
   }
 }
