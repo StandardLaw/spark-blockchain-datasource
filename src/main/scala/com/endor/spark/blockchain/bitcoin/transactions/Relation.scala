@@ -108,7 +108,8 @@ final case class Relation(location: String, network: String)
             val maybeValue = Try(Option(output.getValue)).toOption.flatten.map(_.value)
             Output(outputToAddress(output), index.toLong, maybeValue)
           },
-          time
+          time,
+          transaction.getMessageSize
         )
       }
   }
