@@ -6,7 +6,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import com.endor.spark.blockchain._
 import com.endor.spark.blockchain.bitcoin.IORelationTests._
-import com.endor.spark.blockchain.bitcoin.io.IO
+import com.endor.spark.blockchain.bitcoin.enriched.IO
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.params.MainNetParams
 import play.api.libs.json._
@@ -71,11 +71,11 @@ object BlockDownloader extends App {
     val allIO = jsonBlock.tx.flatMap { tx =>
       val inputs = tx.inputs.zipWithIndex
         .collect { case (Input(Some(output)), index) =>
-          IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = true, index.toLong, Option(jsonBlock.time * 1000))
+          IO(tx.hash, output.addr, Option(output.value), isInput = true, index.toLong, Option(jsonBlock.time * 1000))
         }
 
       val outputs = tx.out.zipWithIndex.map { case (output, index) =>
-        IO(jsonBlock.hash.bytes, tx.hash.bytes, output.addr, Option(output.value), isInput = false, index.toLong, Option(jsonBlock.time * 1000))
+        IO(tx.hash, output.addr, Option(output.value), isInput = false, index.toLong, Option(jsonBlock.time * 1000))
       }
 
       inputs ++ outputs
@@ -120,7 +120,6 @@ object BlockDownloader extends App {
           case io if io.isInput => io.copy(value = io.value.map(-_))
           case io => io
         }
-        .map(comparable)
     }
 
     val path = Paths.get(s"$blockHeight.json")

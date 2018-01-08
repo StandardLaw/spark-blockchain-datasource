@@ -100,7 +100,6 @@ final case class Relation(location: String, network: String)
 
         Transaction(
           block.getHash.getBytes, transaction.getHash.getBytes, transaction.isCoinBase,
-          Option(transaction.getOutputSum.value),
           transaction.getInputs.asScala.zipWithIndex.map { case (input, index) =>
             Input(inputToAddress(input), index.toLong, input.getOutpoint.getHash.getBytes, input.getOutpoint.getIndex)
           },

@@ -1,7 +1,6 @@
 package com.endor.spark.blockchain.bitcoin
 
-import com.endor.spark.blockchain._
-import com.endor.spark.blockchain.bitcoin.io._
+import com.endor.spark.blockchain.bitcoin.enriched._
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.json.{Json, OFormat}
@@ -15,19 +14,26 @@ class IORelationTests extends FunSuite with Matchers {
 
   test("Correctly parse IO from block version 1 (block 68956)") {
     val path = getClass.getResource("blocks/version1").toString
+
+    val expectedTransactions = Seq(
+      "23b2743fe356f0cc125e19375eb37032ee4e7b8bb82c931238969e49366f1333",
+      "8acc1082a9f4260065fb22d24700b2c0a5efb8fa18767aa8f40e91b3036b1515"
+    )
+
     val actual: Seq[IO] = spark
       .read
       .bitcoin
       .transactions(path)
-      .toIO
-      .filter((io: IO) => io.blockHash.hex == "0000000000bef5d742ad3ea3fab0548bf33077a6a91426f37e6ea90bf40205dd")
+      .enriched
+      .io
+      .filter((io: IO) => expectedTransactions.contains(io.transactionHash))
       .collect()
       .toSeq
 
     val expected = Json.parse(getClass.getResourceAsStream("expected/68956.json"))
-      .as[Seq[ComparableIO]]
+      .as[Seq[IO]]
 
-    sameIO(actual.comparable, expected, allValuesMustExist = true, unknownAddressThreshold = 0.01)
+    sameIO(actual, expected, allValuesMustExist = true, unknownAddressThreshold = 0.01)
   }
 
   test("Correctly parse IO from block version 2 (block 332208)") {
@@ -36,15 +42,15 @@ class IORelationTests extends FunSuite with Matchers {
       .read
       .bitcoin
       .transactions(path)
-      .toIO
-      .filter((io: IO) => io.blockHash.hex == "000000000000000007e5cc6f598ac0d10d5c0ae2abacef7373b83914c715636d")
+      .enriched
+      .io
       .collect()
       .toSeq
 
     val expected = Json.parse(getClass.getResourceAsStream("expected/332208.json"))
-      .as[Seq[ComparableIO]]
+      .as[Seq[IO]]
 
-    sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.01)
+    sameIO(actual, expected, allValuesMustExist = false, unknownAddressThreshold = 0.01)
   }
 
   test("Correctly parse IO from block version 3 (block 370505)") {
@@ -53,15 +59,15 @@ class IORelationTests extends FunSuite with Matchers {
       .read
       .bitcoin
       .transactions(path)
-      .toIO
-      .filter((io: IO) => io.blockHash.hex == "00000000000000000bf52d66c6e96aeb60cf1e3d7a07d7e55defaec9b6458845")
+      .enriched
+      .io
       .collect()
       .toSeq
 
     val expected = Json.parse(getClass.getResourceAsStream("expected/370505.json"))
-      .as[Seq[ComparableIO]]
+      .as[Seq[IO]]
 
-    sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.06) // Note: Threshold is higher here
+    sameIO(actual, expected, allValuesMustExist = false, unknownAddressThreshold = 0.06) // Note: Threshold is higher here
   }
 
   test("Correctly parse IO from block version 4 (block 403617)") {
@@ -70,26 +76,25 @@ class IORelationTests extends FunSuite with Matchers {
       .read
       .bitcoin
       .transactions(path)
-      .toIO
-      .filter((io: IO) => io.blockHash.hex == "00000000000000000245be9dd046492886b4527c7fa3494f26a9a9d876ecea22")
+      .enriched
+      .io
       .collect()
       .toSeq
 
     val expected = Json.parse(getClass.getResourceAsStream("expected/403617.json"))
-      .as[Seq[ComparableIO]]
+      .as[Seq[IO]]
 
-    sameIO(actual.comparable, expected, allValuesMustExist = false, unknownAddressThreshold = 0.04) // Note: Threshold is higher here
+    sameIO(actual, expected, allValuesMustExist = false, unknownAddressThreshold = 0.04) // Note: Threshold is higher here
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.ToString"))
-  private def sameIO(actualSeq: GenTraversable[ComparableIO], expectedSeq: Seq[ComparableIO], allValuesMustExist: Boolean, unknownAddressThreshold: Double): Unit = {
+  private def sameIO(actualSeq: GenTraversable[IO], expectedSeq: Seq[IO], allValuesMustExist: Boolean, unknownAddressThreshold: Double): Unit = {
     actualSeq.size should equal(expectedSeq.size)
 
     val unknownAddressCount: Int = expectedSeq.sorted
       .zip(actualSeq.toList.sorted)
       .map { case (expected, actual) =>
         withClue(s"Expected: ${Json.toJsObject(expected).toString}, Actual: ${Json.toJsObject(actual).toString}") {
-          actual.blockHash should equal(expected.blockHash)
           actual.transactionHash should equal(expected.transactionHash)
           actual.isInput should equal(expected.isInput)
           actual.index should equal(expected.index)
@@ -125,22 +130,12 @@ class IORelationTests extends FunSuite with Matchers {
 }
 
 object IORelationTests {
-  final case class ComparableIO(blockHash: String, transactionHash: String, address: Option[String], value: Option[Long], isInput: Boolean, index: Long, timeMs: Option[Long])
+  implicit lazy val ioFormat: OFormat[IO] = Json.format[IO]
 
-  def comparable(io: IO): ComparableIO = {
-    ComparableIO(io.blockHash.hex, io.transactionHash.hex, io.address, io.value, io.isInput, io.index, io.timeMs)
-  }
-
-  implicit class ComparableSeq[T <: GenTraversable[IO]](value: T) {
-    def comparable: GenTraversable[ComparableIO] = value.map(IORelationTests.comparable)
-  }
-
-  implicit lazy val comparableIOFormat: OFormat[ComparableIO] = Json.format[ComparableIO]
-
-  implicit lazy val comparableIOOrdering: Ordering[ComparableIO] = new Ordering[ComparableIO] {
+  implicit lazy val ioOrdering: Ordering[IO] = new Ordering[IO] {
     private val tupleOrdering = Ordering.Tuple3[String, Boolean, Long]
 
-    override def compare(x: ComparableIO, y: ComparableIO): Int = {
+    override def compare(x: IO, y: IO): Int = {
       tupleOrdering.compare((x.transactionHash, x.isInput, x.index), (y.transactionHash, y.isInput, y.index))
     }
   }

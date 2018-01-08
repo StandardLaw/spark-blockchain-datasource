@@ -15,7 +15,7 @@ object Output {
   implicit lazy val encoder: Encoder[Output] = Encoders.product[Output]
 }
 
-final case class Transaction(blockHash: Hash, hash: Hash, isCoinBase: Boolean, value: Option[Long],
+final case class Transaction(blockHash: Hash, hash: Hash, isCoinBase: Boolean,
                              inputs: Seq[Input], outputs: Seq[Output], time: Option[Long], sizeInBytes: Int)
 
 object Transaction {
