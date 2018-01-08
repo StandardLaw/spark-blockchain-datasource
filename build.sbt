@@ -48,8 +48,7 @@ lazy val defaultSettings = Seq(
     Resolver.mavenLocal,
     Resolver.sonatypeRepo("public"),
     Resolver.typesafeRepo("releases"),
-    "ethereum" at "https://dl.bintray.com/ethereum/maven/",
-    "jitpack" at "https://jitpack.io"
+    "ethereum" at "https://dl.bintray.com/ethereum/maven/"
   ),
 
   // This needs to be here for Coursier to be able to resolve the "tests" classifier, otherwise the classifier's ignored
@@ -67,6 +66,7 @@ lazy val defaultSettings = Seq(
     "com.fasterxml.jackson.module" %  "jackson-module-paranamer"     % "2.8.5",
     "com.fasterxml.jackson.module" %% "jackson-module-scala"         % "2.8.5",
     "org.web3j"                    %  "core"                         % "3.1.1",
+    "com.typesafe.play"            %% "play-ahc-ws-standalone"       % "1.1.3",
 
     "org.apache.httpcomponents"    %  "httpclient"                   % "4.5.4"         % "test" classifier "tests",
     "junit"                        %  "junit"                        % "4.12"          % "test",
