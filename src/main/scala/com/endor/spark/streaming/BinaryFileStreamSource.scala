@@ -113,7 +113,6 @@ abstract class BinaryFileStreamSource[S: Encoder](sparkSession: SparkSession,
     func
   }
 
-  /** Return the latest offset in the [[FileStreamSourceLog]] */
   def currentLogOffset: Long = synchronized { metadataLogCurrentOffset }
 
   /**
