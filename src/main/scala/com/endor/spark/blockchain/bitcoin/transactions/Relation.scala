@@ -40,7 +40,7 @@ final case class Relation(location: String, network: String)
             .collectFirst { case (transactionInput, index) if transactionInput == input => index.toString }
             .getOrElse("?")
 
-          logger.warn(s"Unable to decipher address for transaction ${input.getParentTransaction.getHashAsString} input #$possiblyIndex", ex)
+          logger.debug(s"Unable to decipher address for transaction ${input.getParentTransaction.getHashAsString} input #$possiblyIndex", ex)
           None
       }
     }
@@ -62,7 +62,7 @@ final case class Relation(location: String, network: String)
 
         attemptedAddress match {
           case Failure(ex) =>
-            logger.warn(s"Unable to decipher address for transaction ${output.getParentTransactionHash.toString} output #${output.getIndex}", ex)
+            logger.debug(s"Unable to decipher address for transaction ${output.getParentTransactionHash.toString} output #${output.getIndex}", ex)
             None
           case Success(address) =>
             Option(address)
@@ -76,7 +76,7 @@ final case class Relation(location: String, network: String)
       }
     } catch {
       case ex: ScriptException =>
-        logger.warn(s"Unable to decode transaction ${output.getParentTransactionHash.toString} output #${output.getIndex} address", ex)
+        logger.debug(s"Unable to decode transaction ${output.getParentTransactionHash.toString} output #${output.getIndex} address", ex)
         None
     }
   }

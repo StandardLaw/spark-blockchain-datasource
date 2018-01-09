@@ -106,7 +106,17 @@ package object enriched {
                 Option(txFee).map(_.fee)
               }
 
-            Transaction(txData.blockHash.hex, txData.hash.hex, txData.isCoinBase, txData.time, txData.sizeInBytes, fee)
+            val sumOfOutputs =
+              if (txData.outputs.exists(_.value.isEmpty)) {
+                None
+              } else {
+                Option(txData.outputs.flatMap(_.value).sum)
+              }
+
+            Transaction(
+              txData.blockHash.hex, txData.hash.hex, txData.isCoinBase, txData.time, txData.sizeInBytes, fee,
+              sumOfOutputs
+            )
           }
       }
     }
