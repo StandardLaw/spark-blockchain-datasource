@@ -22,7 +22,7 @@ class TokenMetadataScraper() {
   def scrapeAddress(address: String): Option[TokenMetadata] = {
 
     for {
-      doc <- Try(browser.get(s"http://etherscan.io/tokens?q=$address")).toOption
+      doc <- Try(browser.get(s"http://etherscan.io/tokens?q=0x$address")).toOption
       wrapper <- doc >> element("body") >?> element("div[class='wrapper']")
       container <- wrapper.childNodes
         .collect {
