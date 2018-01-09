@@ -1,27 +1,38 @@
 package com.endor.spark.blockchain.ethereum.token
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import play.api.libs.ws.ahc.StandaloneAhcWSClient
+import net.ruippeixotog.scalascraper.browser.JsoupBrowser
+import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
+import net.ruippeixotog.scalascraper.dsl.DSL._
+import net.ruippeixotog.scalascraper.model.ElementNode
+import org.apache.spark.sql.{Encoder, Encoders}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 import scala.util.matching.Regex
 
-final case class TokenMetadata(address: String, symbol: String, totalSupply: String)
+final case class TokenMetadata(address: String, symbol: String, totalSupply: String, decimals: Int)
 
 object TokenMetadata {
-  private val symbolRegex: Regex = "totalSupply = (\\d+).*symbol = ([\\w\\d]+).*".r("totalSupply", "symbol")
-  private lazy val wsClient = {
-    implicit val system: ActorSystem = ActorSystem()
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
-    StandaloneAhcWSClient()
-  }
+  implicit val encoder: Encoder[TokenMetadata] = Encoders.product[TokenMetadata]
+}
 
-  def getDataForAddress(address: String)(implicit ex: ExecutionContext): Future[Option[TokenMetadata]] = {
-    wsClient.url(s"http://etherscan.io/tokens?q=$address").get()
-      .map(response => response.body)
-      .map(symbolRegex.findFirstMatchIn)
-      .map(maybeMatch => maybeMatch.map(actualMatch =>
-        TokenMetadata(address, actualMatch.group("symbol"), actualMatch.group("totalSupply"))))
+class TokenMetadataScraper() {
+  private val browser = JsoupBrowser()
+  private val symbolRegex: Regex = "totalSupply = (\\d+).*symbol = ([\\w\\d]+).*decimals = (\\d+).*".r("totalSupply", "symbol", "decimals")
+
+  def scrapeAddress(address: String): Option[TokenMetadata] = {
+
+    for {
+      doc <- Try(browser.get(s"http://etherscan.io/tokens?q=$address")).toOption
+      wrapper <- doc >> element("body") >?> element("div[class='wrapper']")
+      container <- wrapper.childNodes
+        .collect {
+          case elem: ElementNode[_] =>
+            elem.element
+        }
+        .find(elem => elem.hasAttr("class") && elem.attr("class") == "container")
+      resultBody <- container >?> element("div[class='tag-box tag-box-v3']")
+      matchResult <- symbolRegex.findFirstMatchIn(resultBody.text)
+    } yield TokenMetadata(address, matchResult.group("symbol"),
+      matchResult.group("totalSupply"), matchResult.group("decimals").toInt)
   }
 }
