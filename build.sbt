@@ -6,6 +6,7 @@ enablePlugins(GitVersioning)
 git.useGitDescribe := true
 
 val sparkVersion = "2.2.0"
+val playWsVersion = "1.1.3"
 val sparkScalaVersion = "2.11.8" // Spark relies on a specific version of Scala (including for some hacks)
 
 lazy val defaultSettings = Seq(
@@ -67,6 +68,9 @@ lazy val defaultSettings = Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala"         % "2.8.5",
     "org.web3j"                    %  "core"                         % "3.1.1",
     "net.ruippeixotog"             %% "scala-scraper"                % "2.0.0",
+    "com.typesafe.play"            %% "play-ahc-ws-standalone"       % playWsVersion,
+    "com.typesafe.play"            %% "play-ws-standalone-json"      % playWsVersion,
+    "io.reactivex"                 %% "rxscala"                      % "0.26.5",
 
     "org.apache.httpcomponents"    %  "httpclient"                   % "4.5.4"         % "test" classifier "tests",
     "junit"                        %  "junit"                        % "4.12"          % "test",
