@@ -108,7 +108,7 @@ lazy val assemblySettings = Seq(
   }
 )
 
-lazy val root = project.in(file("."))
+lazy val `spark-blockchain-datasource` = project.in(file("."))
   .settings(defaultSettings ++ assemblySettings)
   .settings(
     // Allow parallel execution of tests as long as each of them gets its own JVM to create a SparkContext on (see SPARK-2243)
