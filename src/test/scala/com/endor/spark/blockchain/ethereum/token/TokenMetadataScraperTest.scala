@@ -1,5 +1,6 @@
 package com.endor.spark.blockchain.ethereum.token
 
+import akka.actor.ActorSystem
 import com.endor.spark.blockchain.ethereum.token.metadata._
 import org.scalatest.{FunSuite, Matchers}
 import org.web3j.protocol.Web3j
@@ -11,6 +12,7 @@ import scala.concurrent.duration._
 
 class TokenMetadataScraperTest extends FunSuite with Matchers {
   implicit val ec: ExecutionContext = ExecutionContext.global
+  implicit val actorSystem: ActorSystem = ActorSystem()
 
   ignore("Getting EOS token data from etherscan") {
     val address = "86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0"
