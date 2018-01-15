@@ -70,7 +70,7 @@ object LogsFetcher extends App {
       |                                                             -= customer-migrator =-
       |""".stripMargin
 
-  private val parser = new OptionParser[Command]("customer-migrator") {
+  private val parser = new OptionParser[Command]("logs-fetcher") {
     head(Console.BLUE + logo + Console.RESET)
 
     help("help")
