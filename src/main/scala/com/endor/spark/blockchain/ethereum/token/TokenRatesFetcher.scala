@@ -6,6 +6,7 @@ import java.time.LocalDate
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.ws.JsonBodyReadables._
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -40,7 +40,8 @@ object TokenRate {
     OFormat(reads, writes)
   }
 
-  def fromSingleRate(token: String, date: Date, rate: Double) = TokenRate(token, date, rate, rate, rate, rate)
+  def fromSingleRate(token: String, date: Date, rate: Double): TokenRate =
+    TokenRate(token, date, rate, rate, rate, rate)
 }
 
 class TokenRatesScraper() {
