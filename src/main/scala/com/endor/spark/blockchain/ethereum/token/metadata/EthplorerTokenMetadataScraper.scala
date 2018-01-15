@@ -9,14 +9,11 @@ import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EthplorerTokenMetadataScraper(apiKey: String) extends TokenMetadataScraper {
+class EthplorerTokenMetadataScraper(apiKey: String)
+                                   (implicit system: ActorSystem) extends TokenMetadataScraper {
   import EthplorerTokenMetadataScraper._
 
-  private val wsClient = {
-    val system = ActorSystem()
-    val materializer = ActorMaterializer()(system)
-    StandaloneAhcWSClient()(materializer)
-  }
+  private val wsClient = StandaloneAhcWSClient()(ActorMaterializer())
 
   override def scrapeAddress(address: String)
                             (implicit ec: ExecutionContext): Future[TokenMetadata] = {

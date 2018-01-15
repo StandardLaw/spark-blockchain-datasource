@@ -13,7 +13,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 final case class TokenRate(token: String, date: Date, open: Double, high: Double, low: Double,
-                           close: Double, volume: Long, marketCap: Long)
+                           close: Double)
 
 object TokenRate {
   implicit lazy val encoder: Encoder[TokenRate] = Encoders.product[TokenRate]
@@ -25,10 +25,7 @@ object TokenRate {
         (__ \ "open").read[Double] and
         (__ \ "high").read[Double] and
         (__ \ "low").read[Double] and
-        (__ \ "close").read[Double] and
-        (__ \ "volume").read[Long] and
-        (__ \ "marketCap").read[Long]
-
+        (__ \ "close").read[Double]
       )(TokenRate.apply _)
 
     @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
@@ -38,12 +35,12 @@ object TokenRate {
       "open" -> JsNumber(o.open),
       "high" -> JsNumber(o.high),
       "low" -> JsNumber(o.low),
-      "close" -> JsNumber(o.close),
-      "volume" -> JsNumber(o.volume),
-      "marketCap" -> JsNumber(o.marketCap)
+      "close" -> JsNumber(o.close)
     ))
     OFormat(reads, writes)
   }
+
+  def fromSingleRate(token: String, date: Date, rate: Double) = TokenRate(token, date, rate, rate, rate, rate)
 }
 
 class TokenRatesScraper() {
@@ -63,10 +60,10 @@ class TokenRatesScraper() {
             (row >> elementList("td"))
               .map(_.text)
         } map {
-          case List(date, open, high, low, close, volume, marketCap) =>
+          case List(date, open, high, low, close, _, _) =>
             val parsedDate = parser.parse(date)
             TokenRate(slug, new java.sql.Date(parsedDate.getTime), open.toDouble, high.toDouble, low.toDouble,
-              close.toDouble, volume.replace(",", "").toLong, marketCap.replace(",", "").toLong)
+              close.toDouble)
         }
       })
   }
