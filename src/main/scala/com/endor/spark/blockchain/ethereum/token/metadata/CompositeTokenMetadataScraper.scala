@@ -9,9 +9,9 @@ class CompositeTokenMetadataScraper(underlyingScraper: TokenMetadataScraper, und
   override def scrapeAddress(address: String)(implicit ec: ExecutionContext): Future[TokenMetadata] =
     underlyingScrapers.foldLeft(underlyingScraper.scrapeAddress(address)) {
       (a, b) =>
-        a.flatMap {
+        a flatMap {
           case metadata if metadata.isComplete => Future.successful(metadata)
-          case metadata => b.scrapeAddress(address).map(_.mergeWith(metadata))
+          case metadata => b.scrapeAddress(address).map(metadata.mergeWith)
         } recoverWith {
           case _ => b.scrapeAddress(address)
         }

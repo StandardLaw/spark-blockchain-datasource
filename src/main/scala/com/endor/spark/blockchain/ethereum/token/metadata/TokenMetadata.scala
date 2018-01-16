@@ -6,13 +6,19 @@ final case class TokenMetadata(address: String, symbol: Option[String],
                                totalSupply: Option[String], decimals: Option[Int]) {
   def mergeWith(other: TokenMetadata): TokenMetadata =
     TokenMetadata(address,
-      symbol.filter(_.length > 0) orElse other.symbol.filter(_.length > 0),
-      totalSupply.filter(_.length > 0) orElse other.totalSupply.filter(_.length > 0),
+      symbol.filter(!_.isEmpty) orElse other.symbol.filter(!_.isEmpty),
+      totalSupply.filter(!_.isEmpty) orElse other.totalSupply.filter(!_.isEmpty),
       decimals orElse other.decimals)
 
-  def isComplete: Boolean =
-    Seq(symbol, totalSupply, decimals).forall(_.isDefined) &&
-      Seq(symbol, totalSupply).flatMap(_.map(_.length > 0)).forall(identity)
+  def isComplete: Boolean = {
+    val allNonEmptyAndDefined = for {
+      s <- symbol
+      t <- totalSupply
+      _ <- decimals
+    } yield !s.isEmpty && !t.isEmpty
+
+    allNonEmptyAndDefined.getOrElse(false)
+  }
 }
 
 object TokenMetadata {
