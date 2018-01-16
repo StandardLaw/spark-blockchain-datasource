@@ -2,13 +2,18 @@ package com.endor.spark.blockchain.ethereum.token.metadata
 
 import scala.concurrent.{ExecutionContext, Future}
 
+
 class CompositeTokenMetadataScraper(underlyingScraper: TokenMetadataScraper, underlyingScrapers: TokenMetadataScraper*)
   extends TokenMetadataScraper {
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   override def scrapeAddress(address: String)(implicit ec: ExecutionContext): Future[TokenMetadata] =
-    (Seq(underlyingScraper) ++ underlyingScrapers).map(_.scrapeAddress(address)).reduce {
-      (a, b) => a recoverWith {
-        case _ => b
-      }
+    underlyingScrapers.foldLeft(underlyingScraper.scrapeAddress(address)) {
+      (a, b) =>
+        a.flatMap {
+          case metadata if metadata.isComplete => Future.successful(metadata)
+          case metadata => b.scrapeAddress(address).map(_.mergeWith(metadata))
+        } recoverWith {
+          case _ => b.scrapeAddress(address)
+        }
     }
 }

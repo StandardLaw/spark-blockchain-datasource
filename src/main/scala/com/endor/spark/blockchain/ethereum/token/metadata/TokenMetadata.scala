@@ -5,8 +5,14 @@ import org.apache.spark.sql.{Encoder, Encoders}
 final case class TokenMetadata(address: String, symbol: Option[String],
                                totalSupply: Option[String], decimals: Option[Int]) {
   def mergeWith(other: TokenMetadata): TokenMetadata =
-    TokenMetadata(address, symbol orElse other.symbol,
-      totalSupply orElse other.totalSupply, decimals orElse other.decimals)
+    TokenMetadata(address,
+      symbol.filter(_.length > 0) orElse other.symbol.filter(_.length > 0),
+      totalSupply.filter(_.length > 0) orElse other.totalSupply.filter(_.length > 0),
+      decimals orElse other.decimals)
+
+  def isComplete: Boolean =
+    Seq(symbol, totalSupply, decimals).forall(_.isDefined) &&
+      Seq(symbol, totalSupply).flatMap(_.map(_.length > 0)).forall(identity)
 }
 
 object TokenMetadata {
