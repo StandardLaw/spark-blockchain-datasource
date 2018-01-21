@@ -15,7 +15,7 @@ class TokenRatesFetcher()(implicit system: ActorSystem) {
   private val wsClient = StandaloneAhcWSClient()(ActorMaterializer())
 
   def fetchRate(token: String)
-               (implicit ex: ExecutionContext): Future[TokenRate] = {
+               (implicit ex: ExecutionContext): Future[Option[TokenRate]] = {
     val today = Date.valueOf(LocalDate.now())
     wsClient.url(s"https://min-api.cryptocompare.com/data/price?fsym=$token&tsyms=USD")
       .get()
@@ -26,10 +26,6 @@ class TokenRatesFetcher()(implicit system: ActorSystem) {
             rate <- result.get("USD")
             rateDouble <- rate.asOpt[Double]
           } yield TokenRate.fromSingleRate(token, today, rateDouble)
-      }
-      .flatMap {
-        case Some(rate) => Future.successful(rate)
-        case None => Future.failed(new Exception("Could not fetch rate"))
       }
   }
 }
