@@ -1,6 +1,8 @@
 package com.endor.spark.blockchain.ethereum.token
 
 import akka.actor.ActorSystem
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.util.ContextInitializer
 import com.endor.spark.blockchain.ethereum.token.metadata._
 import org.scalatest.{FunSuite, Matchers}
 import org.web3j.protocol.Web3j
@@ -13,6 +15,12 @@ import scala.concurrent.duration._
 class TokenMetadataScraperTest extends FunSuite with Matchers {
   implicit val ec: ExecutionContext = ExecutionContext.global
   implicit val actorSystem: ActorSystem = ActorSystem()
+  implicit lazy val loggerFactory: LoggerContext = {
+    val loggerContext = new LoggerContext()
+    val contextInitializer = new ContextInitializer(loggerContext)
+    contextInitializer.autoConfig()
+    loggerContext
+  }
 
   ignore("Getting EOS token data from etherscan") {
     val address = "86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0"

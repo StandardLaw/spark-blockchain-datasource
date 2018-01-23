@@ -2,6 +2,7 @@ package com.endor.spark.blockchain.ethereum.token.metadata
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import ch.qos.logback.classic.{Logger, LoggerContext}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL._
 import net.ruippeixotog.scalascraper.model.ElementNode
@@ -12,7 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
 class EtherscanTokenMetadataScraper()
-                                   (implicit system: ActorSystem) extends TokenMetadataScraper {
+                                   (implicit system: ActorSystem, loggerFactory: LoggerContext)
+  extends TokenMetadataScraper {
+  private lazy val logger: Logger = loggerFactory.getLogger(this.getClass)
   private val browser = JsoupBrowser()
   private val wsClient = {
     val materializer = ActorMaterializer()
@@ -22,6 +25,7 @@ class EtherscanTokenMetadataScraper()
 
   def scrapeAddress(address: String)
                    (implicit ec: ExecutionContext): Future[TokenMetadata] = {
+    logger.debug(s"Scraping etherscan for $address")
     wsClient.url(s"http://etherscan.io/tokens?q=0x$address").get()
       .map(_.body)
       .map(browser.parseString)
