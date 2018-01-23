@@ -39,4 +39,15 @@ class TokenMetadataScraperTest extends FunSuite with Matchers {
     val result = Await.result(scraper.scrapeAddress(address), 30 seconds)
     result should equal (expectedMetadata)
   }
+
+  ignore("debug") {
+    val scraper = {
+      new CompositeTokenMetadataScraper(
+        new Web3TokenMetadataScraper(Web3j.build(new HttpService(s"http://geth.endorians.com:8545/"))),
+        new EthplorerTokenMetadataScraper("freekey"),
+        new EtherscanTokenMetadataScraper()
+      )
+    }
+    println(Await.result(scraper.scrapeAddress("11F8DD7699147566Cf193596083d45C8F592C4BA"), 1 minute))
+  }
 }
