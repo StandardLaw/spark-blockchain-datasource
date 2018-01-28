@@ -21,7 +21,7 @@ class EtherscanTokenMetadataScraper()
     val materializer = ActorMaterializer()
     StandaloneAhcWSClient()(materializer)
   }
-  private val symbolRegex: Regex = "totalSupply = (\\d+).*symbol = ([\\w\\d]+).*decimals = (\\d+).*".r("totalSupply", "symbol", "decimals")
+  private val symbolRegex: Regex = "totalSupply = (\\d*).*name = ([\\w\\d]*).*symbol = ([\\w\\d]*).*decimals = (\\d*).*".r("totalSupply", "name", "symbol", "decimals")
 
   def scrapeAddress(address: String)
                    (implicit ec: ExecutionContext): Future[TokenMetadata] = {
@@ -40,8 +40,8 @@ class EtherscanTokenMetadataScraper()
       .map(_.flatMap(resultBody => symbolRegex.findFirstMatchIn(resultBody.text)))
       .flatMap {
         case Some(matchResult) => Future.successful(
-          TokenMetadata.fromConcrete(address, matchResult.group("symbol"),
-            matchResult.group("totalSupply"), matchResult.group("decimals").toInt)
+          TokenMetadata(address, matchResult.group("name"), matchResult.group("symbol"),
+            matchResult.group("totalSupply"), Option(matchResult.group("decimals").toInt))
         )
         case None => Future.failed(new Exception("No regex match"))
       }

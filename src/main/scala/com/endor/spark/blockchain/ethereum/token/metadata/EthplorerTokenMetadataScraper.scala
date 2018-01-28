@@ -3,8 +3,8 @@ package com.endor.spark.blockchain.ethereum.token.metadata
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import ch.qos.logback.classic.{Logger, LoggerContext}
+import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsObject, JsPath, JsValue, Reads}
 import play.api.libs.ws.JsonBodyReadables._
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
@@ -30,9 +30,10 @@ class EthplorerTokenMetadataScraper(apiKey: String)
 
 object EthplorerTokenMetadataScraper {
   implicit val tokenMetadataReads: Reads[TokenMetadata] = (
-    (JsPath \ "address").read[String] and
-      (JsPath \ "symbol").readNullable[String] and
-      (JsPath \ "totalSupply").readNullable[String] and
-      (JsPath \ "decimals").readNullable[Int]
-    )(TokenMetadata.apply _)
+    (__ \ "address").read[String] and
+      (__ \ "name").read[String].orElse(Reads.pure("")) and
+      (__ \ "symbol").read[String].orElse(Reads.pure("")) and
+      (__ \ "totalSupply").read[String].orElse(Reads.pure("")) and
+      (__ \ "decimals").readNullable[Int]
+    )(TokenMetadata.fromConcrete _)
 }

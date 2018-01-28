@@ -21,8 +21,9 @@ class Web3TokenMetadataScraper(web3j: Web3j)(implicit loggerFactory: LoggerConte
     val contract = DetailedERC20.load(s"0x$address", web3j, transactionManager, bigInteger0, bigInteger0)
     for {
       decimals <- toScala(contract.decimals().sendAsync())
+      name <- toScala(contract.name().sendAsync())
       symbol <- toScala(contract.symbol().sendAsync())
       totalSupply <- toScala(contract.totalSupply().sendAsync())
-    } yield TokenMetadata(address, Option(symbol).filter(_.nonEmpty), Option(totalSupply.toString), Option(decimals.intValue()))
+    } yield TokenMetadata(address, name, symbol, totalSupply.toString, Option(decimals.intValue()))
   }
 }
