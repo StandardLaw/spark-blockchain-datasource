@@ -2,6 +2,8 @@
 import Tests._
 import sbt.librarymanagement.Resolver
 
+import scala.io.Source
+
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
 
@@ -107,6 +109,31 @@ lazy val assemblySettings = Seq(
         oldStrategy(x)
   }
 )
+
+resourceGenerators in Test += Def.task {
+  def getResourceContents(classpathEntry: Attributed[File], resourceName: String): Option[String] = {
+    classpathEntry.get(artifact.key).map(entryArtifact => {
+      val jarFile = classpathEntry.data
+      IO.withTemporaryDirectory { tmpDir =>
+        IO.unzip(jarFile, tmpDir)
+        // copy to project's target directory
+        // Instead of copying you can do any other stuff here
+        Source.fromFile(tmpDir / resourceName).mkString
+      }
+    })
+  }
+  val contents = (dependencyClasspath in Test).value
+    .filter(_.get(artifact.key) match {
+      case Some(artifactKey) if artifactKey.name == "ethereumj-core" => true
+      case Some(artifactKey) if artifactKey.extraAttributes.get("groupId").contains("org.web3j") && artifactKey.name == "core" => true
+      case _ => false
+    })
+    .flatMap(entry => getResourceContents(entry, "version.properties"))
+    .mkString(System.lineSeparator())
+  val file = (resourceManaged in Compile).value / "version.properties"
+  IO.write(file, contents)
+  Seq(file)
+}.taskValue
 
 lazy val `spark-blockchain-datasource` = project.in(file("."))
   .settings(defaultSettings ++ assemblySettings)
