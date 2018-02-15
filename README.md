@@ -1,4 +1,5 @@
 # spark-blockchain-datasource
+[![Build Status](https://travis-ci.org/EndorCoin/spark-blockchain-datasource.svg?branch=master)](https://travis-ci.org/EndorCoin/spark-blockchain-datasource)
 
 A [Spark datasource](http://spark.apache.org/docs/latest/sql-programming-guide.html#data-sources) to load various blockchains into Spark
 
