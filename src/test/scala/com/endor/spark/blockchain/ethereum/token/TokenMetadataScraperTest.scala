@@ -31,11 +31,11 @@ class TokenMetadataScraperTest extends FunSuite with Matchers {
     result should equal (expectedMetadata)
   }
 
-  test("Getting REP token data from JSON-RPC") {
+  ignore("Getting REP token data from JSON-RPC") {
     val address = "E94327D07Fc17907b4DB788E5aDf2ed424adDff6"
     val expectedMetadata = TokenMetadata(address, "Reputation", "REP", "11000000000000000000000000", Option(18))
 
-    val scraper = new Web3TokenMetadataScraper(Web3j.build(new HttpService(s"http://34.207.229.67:8545/")))
+    val scraper = new Web3TokenMetadataScraper(Web3j.build(new HttpService(s"http://geth.endorians.com:8545/")))
     val result = Await.result(scraper.scrapeAddress(address), 30 seconds)
     result should equal (expectedMetadata)
   }
