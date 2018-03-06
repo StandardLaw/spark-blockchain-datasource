@@ -6,9 +6,9 @@ final case class TokenMetadata(address: String, name: Option[String], symbol: Op
                                totalSupply: Option[String], decimals: Option[Int]) {
   def mergeWith(other: TokenMetadata): TokenMetadata =
     TokenMetadata(address,
-      name.filter(!_.isEmpty) orElse other.name.filter(!_.isEmpty),
-      symbol.filter(!_.isEmpty) orElse other.symbol.filter(!_.isEmpty),
-      totalSupply.filter(!_.isEmpty) orElse other.totalSupply.filter(!_.isEmpty),
+      name.filter(_.nonEmpty) orElse other.name.filter(_.nonEmpty),
+      symbol.filter(_.nonEmpty) orElse other.symbol.filter(_.nonEmpty),
+      totalSupply.filter(_.nonEmpty) orElse other.totalSupply.filter(_.nonEmpty),
       decimals orElse other.decimals)
 
   def isComplete: Boolean = {
@@ -17,7 +17,7 @@ final case class TokenMetadata(address: String, name: Option[String], symbol: Op
       s <- symbol
       t <- totalSupply
       _ <- decimals
-    } yield !n.isEmpty && !s.isEmpty && !t.isEmpty
+    } yield n.nonEmpty && s.nonEmpty && t.nonEmpty
 
     allNonEmptyAndDefined.getOrElse(false)
   }
@@ -27,8 +27,8 @@ object TokenMetadata {
   implicit val encoder: Encoder[TokenMetadata] = Encoders.product[TokenMetadata]
 
   def apply(address: String, name: String, symbol: String, totalSupply: String, decimals: Option[Int]): TokenMetadata =
-    new TokenMetadata(address, Option(name).filter(!_.isEmpty),
-      Option(symbol).filter(!_.isEmpty), Option(totalSupply).filter(!_.isEmpty), decimals)
+    new TokenMetadata(address, Option(name).filter(_.nonEmpty),
+      Option(symbol).filter(_.nonEmpty), Option(totalSupply).filter(_.nonEmpty), decimals)
 
   def fromConcrete(address: String, name: String, symbol: String,
                    totalSupply: String, decimals: Option[Int]): TokenMetadata =

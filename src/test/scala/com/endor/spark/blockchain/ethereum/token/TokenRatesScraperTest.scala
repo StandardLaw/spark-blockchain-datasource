@@ -12,8 +12,8 @@ class TokenRatesScraperTest extends FunSuite with Matchers {
     val data = scraper.scrapeToken("eos", start, end)
 
     val expectedData = Seq(
-      TokenRate("eos", java.sql.Date.valueOf("2017-12-31"), 8.51, 8.97, 8.44, 8.77),
-      TokenRate("eos", java.sql.Date.valueOf("2018-01-01"), 8.77, 9.11, 8.51, 8.84)
+      TokenRate("eos", java.sql.Date.valueOf("2017-12-31"), 8.51, 8.97, 8.44, 8.77, 4876510000L),
+      TokenRate("eos", java.sql.Date.valueOf("2018-01-01"), 8.77, 9.11, 8.51, 8.84, 5041600000L)
     )
 
     data should contain theSameElementsAs expectedData
