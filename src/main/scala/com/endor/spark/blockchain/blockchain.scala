@@ -4,7 +4,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 package object blockchain {
   implicit class StringOps(val value: String) extends AnyVal {
-    def bytes: Array[Byte] = value.grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
+    def bytes: Array[Byte] = value.replaceFirst("0x", "").grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
     def hexToLong: Long = java.lang.Long.parseLong(value.replaceFirst("0x", ""), 16)
   }
 
