@@ -2,19 +2,19 @@ package com.endor.spark.blockchain.ethereum.token.logsfetcher
 
 import java.io.{File, FileWriter}
 
-import com.endor.spark.blockchain.ethereum.token.TokenTransferEvent
+import com.endor.spark.blockchain.ethereum.token.EthLogsParser
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.EthLog.LogObject
 import org.web3j.protocol.http.HttpService
 import org.web3j.protocol.ipc.{IpcService, UnixDomainSocket}
-import scopt.OptionParser
 import play.api.libs.json._
+import scopt.OptionParser
 
+import scala.collection.JavaConverters._
 import scala.reflect.io.Path
 import scala.util.Try
-import scala.collection.JavaConverters._
 
 
 
@@ -143,6 +143,7 @@ object LogsFetcher extends App {
           case CommunicationMode.Http(url) => new HttpService(s"http://$url/")
         }
         val web3j = Web3j.build(service)
+        val parser = new EthLogsParser(web3j)
         val filter = command.topics.foldLeft(new EthFilter(
           command.fromBlock,
           command.toBlock,
@@ -154,7 +155,7 @@ object LogsFetcher extends App {
           .collect {
             case log: LogObject => log
           }
-          .flatMap(TokenTransferEvent.fromEthLog)
+          .flatMap(parser.fromEthLog)
           .map(event => Json.toJson(event))
         val eventsJsArray = JsArray(events)
         val writer = new FileWriter(command.output, false)
