@@ -64,7 +64,7 @@ lazy val defaultSettings = Seq(
     "org.apache.spark"             %% "spark-catalyst"               % sparkVersion    % "provided,test",
 
     "com.google.guava"             %  "guava"                        % "14.0.1"        % "provided,test",
-    "org.ethereum"                 %  "ethereumj-core"               % "1.6.3-RELEASE" exclude("com.google.guava", "guava"),
+    "org.ethereum"                 %  "ethereumj-core"               % "1.7.1-RELEASE" exclude("com.google.guava", "guava"),
     "org.bitcoinj"                 %  "bitcoinj-core"                % "0.14.5"        exclude("com.google.guava", "guava"),
     "ch.qos.logback"               %  "logback-classic"              % "1.2.3"         % "provided",
     "com.fasterxml.jackson.module" %  "jackson-module-paranamer"     % "2.8.5",
