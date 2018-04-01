@@ -39,8 +39,8 @@ class TokenStreamSource(databaseLocation: String, syncEnabled: Boolean)(@transie
         txInfo = transactionStore.get(tx.getHash, block.getHash)
         logInfo <- txInfo.getReceipt.getLogInfoList.asScala
         _ <- logInfo.getTopics.asScala.headOption.map(_.getData.hex).filter(_ == TokenTransferEvent.topic.drop(2))
-        fromAddress <- logInfo.getTopics.asScala.tail.headOption.map(_.getData)
-        toAddress <- logInfo.getTopics.asScala.tail.tail.headOption.map(_.getData)
+        fromAddress <- logInfo.getTopics.asScala.drop(1).headOption.map(_.getData)
+        toAddress <- logInfo.getTopics.asScala.drop(2).headOption.map(_.getData)
       } yield TokenTransferEvent(
         logInfo.getAddress,
         fromAddress,
