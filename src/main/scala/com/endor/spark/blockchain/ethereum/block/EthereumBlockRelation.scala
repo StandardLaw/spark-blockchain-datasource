@@ -1,6 +1,6 @@
 package com.endor.spark.blockchain.ethereum.block
 
-import java.io.InputStream
+import java.io.{DataInputStream, EOFException}
 
 import com.endor.spark.blockchain._
 import org.apache.spark.input.PortableDataStream
@@ -9,6 +9,8 @@ import org.apache.spark.sql.sources.{BaseRelation, TableScan}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
 import org.ethereum.core.Block
+
+import scala.util.{Failure, Success, Try}
 
 final case class EthereumBlockRelation(locations: String*)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan with Serializable {
@@ -27,38 +29,18 @@ final case class EthereumBlockRelation(locations: String*)(@transient val sqlCon
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
-  private def loopedRead(inputStream: InputStream, amount: Int): Array[Byte] = {
-    Stream.continually(()).scanLeft((Array.emptyByteArray, 0)) {
-      case ((dataReadSoFar, _), _) =>
-        val leftToRead = amount - dataReadSoFar.length
-        val moreData = new Array[Byte](leftToRead)
-        inputStream.read(moreData) match {
-          case -1 =>
-            (dataReadSoFar, -1)
-          case amountRead =>
-            (dataReadSoFar ++ moreData.slice(0, amountRead), amountRead)
-        }
-    }
-      .dropWhile {
-        case (_, lastRead) if lastRead == -1 => false
-        case (dataReadSoFar, _) => dataReadSoFar.length < amount
-      }
-      .head._1
-  }
-
-  private def readSingleBlock(is: InputStream): Option[Block] = {
-    val listHeader = loopedRead(is, 10)
-    if (listHeader.length < 10) {
-      None
-    } else {
+  private def readSingleBlock(is: DataInputStream): Option[Block] = {
+    val listHeader = Array.fill[Byte](10)(0)
+    Try {
+      is.readFully(listHeader)
       val blockSize = parseRLPLengthWithIndicator(listHeader)
-      val remainingData = loopedRead(is, blockSize.toInt - 10)
-      if (remainingData.length < blockSize.toInt - 10) {
-        None
-      } else {
-        Option(new Block(listHeader ++ remainingData))
-      }
+      val remainingData = Array.fill[Byte](blockSize.toInt - 10)(0)
+      is.readFully(remainingData)
+      new Block(listHeader ++ remainingData)
+    } match {
+      case Success(block) => Option(block)
+      case Failure(_: EOFException) => None
+      case Failure(err) => throw err
     }
   }
 
@@ -69,6 +51,7 @@ final case class EthereumBlockRelation(locations: String*)(@transient val sqlCon
         case (_: String, data: PortableDataStream) =>
           val is = data.open()
           val result = Stream.continually(()).map(_ => readSingleBlock(is)).takeWhile(_.isDefined).flatten.force
+          is.close()
           result
       }
       .map((block: Block) => SimpleEthereumBlock.fromEthereumjBlock(block))
