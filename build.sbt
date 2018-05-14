@@ -7,7 +7,7 @@ import scala.io.Source
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
 
-val sparkVersion = "2.2.0"
+val sparkVersion = "2.3.0"
 val playWsVersion = "1.1.3"
 val sparkScalaVersion = "2.11.8" // Spark relies on a specific version of Scala (including for some hacks)
 
@@ -79,7 +79,7 @@ lazy val defaultSettings = Seq(
     "junit"                        %  "junit"                        % "4.12"          % "test",
     "org.joda"                     %  "joda-convert"                 % "1.9.2"         % "test",
     "com.typesafe.play"            %% "play-json"                    % "2.6.8"         % "test",
-    "org.scalatest"                %% "scalatest"                    % "2.2.6"         % "test"
+    "org.scalatest"                %% "scalatest"                    % "3.0.4"         % "test"
   ),
 
   dependencyOverrides ++= Seq(
