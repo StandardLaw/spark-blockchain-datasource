@@ -50,9 +50,14 @@ final case class EthereumBlockRelation(locations: String*)(@transient val sqlCon
       .flatMap {
         case (_: String, data: PortableDataStream) =>
           val is = data.open()
-          val result = Stream.continually(()).map(_ => readSingleBlock(is)).takeWhile(_.isDefined).flatten.force
-          is.close()
-          result
+          Stream.continually(())
+            .map(_ => readSingleBlock(is))
+            .takeWhile(_.isDefined)
+            .flatten
+            .append {
+              is.close()
+              Seq.empty[Block]
+            }
       }
       .map((block: Block) => SimpleEthereumBlock.fromEthereumjBlock(block))
   }
